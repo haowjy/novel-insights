@@ -1,2 +1,3 @@
-langchain==0.0.345
-llama_cpp_python==0.2.20
+llama-cpp-python -C cmake.args="-DLLAMA_BLAS=ON;-DLLAMA_BLAS_VENDOR=OpenBLAS"
+langchain
+fanficfare==4.32.3
