@@ -18,7 +18,13 @@ Then
 pip install -r requirements.txt
 ```
 
-## Install Models
+### Pandoc, universal document converter
+
+```bash
+conda install -c conda-forge pandoc
+```
+
+## Downloading Models
 
 ```bash
 pip3 install huggingface-hub
