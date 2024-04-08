@@ -12,3 +12,5 @@ html2text
 Unidecode
 
 fanficfare==4.32.3
+
+lxml
