@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Literal
+from typing import Literal,Callable
 from itertools import zip_longest
 
 from ebooklib import epub
@@ -11,11 +11,30 @@ import html2text
 H2T = html2text.HTML2Text()
 H2T.body_width = 0
 
-import tiktoken
+try:
+    import tiktoken
+    
+except ImportError:
+    pass
 
-def TOK_COUNT(text:str, encoding: tiktoken.Encoding) -> int:
-    return len(encoding.encode(text))
+def GET_ESTIMATOR(source: str, encoding_name:str='cl100k_base') -> Callable[[str], int]:
+        """Use the tiktoken library to estimate the number of tokens in a text.
+        See [tiktoken](https://github.com/openai/tiktoken) for more information. 
 
+        Args:
+            source (str): Source of the estimator. I.e. "openai" or "tiktoken" for the tiktoken library.
+            encoding_name (str, optional): The tiktoken encoding name used to count and estimate the number of tokens. Defaults to 'cl100k_base'.
+
+        Returns:
+            Callable[[str], int]: A function that takes a string and returns the number of tokens in the string.
+        """
+        try:
+            if source.lower() == 'openai' or source.lower() == 'tiktoken':
+                encoding = tiktoken.get_encoding(encoding_name=encoding_name)
+                return lambda x: len(encoding.encode(x))
+        except ImportError:
+            pass
+    
 def has_text(tag):
     return tag.string is not None and tag.string.strip()
 
@@ -207,12 +226,12 @@ class TocNode(dict):
             self.element = soup.find(has_text) # find the first element with text
             return self.element
     
-    def set_content(self, content: str, encoding: tiktoken.Encoding = None):
+    def set_content(self, content: str, token_estimator: Callable[[str], int] = None):
         self.content = content
-        if encoding: self.content_token_count = TOK_COUNT(content, encoding)
+        if token_estimator: self.content_token_count = token_estimator(content)
         
-    def set_tok_count(self, encoding: tiktoken.Encoding):
-        self.content_token_count = TOK_COUNT(self.content, encoding)
+    def set_tok_count(self, token_estimator: Callable[[str], int]):
+        if token_estimator: self.content_token_count = token_estimator(self.content)
         
     def get_section_tok_count(self) -> int:
         tok_count = 0
@@ -238,17 +257,15 @@ class TocNode(dict):
     
 class TocTree:
     
-    def __init__(self, book: epub.EpubBook, encoding_name: str = 'cl100k_base'):
+    def __init__(self, book: epub.EpubBook, token_estimator: Callable[[str], int] = None):
         """Tree structure of the Table of Contents of an Epub book and the content of each node.
 
         Args:
             book (epub.EpubBook): Epub book object
-            encoding_name (str, optional): The encoding name used to count and estimate the number of tokens. If None, will not estimate number of tokens. 
-            See [tiktoken](https://github.com/openai/tiktoken) for more information. 
-            Defaults to 'cl100k_base' (gpt-3.5/4).
+            token_estimater (Callable[[str], int], optional): Function to estimate the number of tokens in a string. Defaults to None.
         """
 
-        if encoding_name: self.encoding = tiktoken.get_encoding(encoding_name=encoding_name)
+        self.token_estimator = token_estimator
         self.book = book
         
         self.root: TocNode = TocNode('root')
@@ -269,7 +286,7 @@ class TocTree:
         
         for href, nodes in self._href_node_cache.items():
             if len(nodes) == 1: # if there are multiple nodes with the same href, then we need to combine them
-                nodes[0].set_content(H2T.handle(self._href_soup_cache[href].prettify()), encoding=self.encoding)
+                nodes[0].set_content(H2T.handle(self._href_soup_cache[href].prettify()), token_estimator=self.token_estimator)
             else: # if there is only 1 node with the href, then we need to set the content of the node
                 self._set_xhtml_content(nodes)
     
@@ -320,10 +337,10 @@ class TocTree:
                 first_node = False
  
                 content = "\n".join(extract_content_between_elems(None, elem1) + extract_content_between_elems(elem1, elem2))
-                node1.set_content(content, encoding=self.encoding)
+                node1.set_content(content, token_estimator=self.token_estimator)
             else:
                 content = "\n".join(extract_content_between_elems(elem1, elem2))
-                node1.set_content(content, encoding=self.encoding)
+                node1.set_content(content, token_estimator=self.token_estimator)
     
     def get_tree(self) -> TocNode:
         return self.root
