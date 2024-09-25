@@ -1,15 +1,18 @@
-llama-cpp-python -C cmake.args="-DLLAMA_BLAS=ON;-DLLAMA_BLAS_VENDOR=OpenBLAS"
-langchain
-
+llama-index
 llama-index-core
+llama-index-readers-file
+
+# optional
 llama-index-llms-huggingface
 transformers[torch]
 
-llama-index-readers-file
-ebooklib
-html2text
+ebook-tree-parser
 
 Unidecode
+python-dotenv
+
+openai
+anthropic
 
 fanficfare==4.32.3
 

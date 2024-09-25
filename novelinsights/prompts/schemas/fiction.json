@@ -1,0 +1,354 @@
+{
+    "type": "object",
+    "properties": {
+        "novelInfo": {
+            "type": "object",
+            "description": "Basic information about the novel. Update this section with every new excerpt if necessary",
+            "properties": {
+                "title": {
+                    "type": "string",
+                    "description": "The full title of the novel"
+                },
+                "author": {
+                    "type": "string",
+                    "description": "The name of the author(s)"
+                },
+                "genre": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "List of genres the novel belongs to"
+                }
+            },
+            "required": [
+                "title",
+                "author"
+            ]
+        },
+        "summary": {
+            "type": "string",
+            "description": "A comprehensive summary of the entire story, including key events and developments up to the current excerpt"
+        },
+        "characters": {
+            "type": "array",
+            "description": "List of characters in the novel and their key details. Update with new characters every next excerpt",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The character's full name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Current physical description and key traits of the character"
+                    },
+                    "role": {
+                        "type": "string",
+                        "description": "The character's current role in the story"
+                    },
+                    "firstAppearance": {
+                        "type": "string",
+                        "description": "The excerpt title where the character first appears"
+                    },
+                    "lastAppearance": {
+                        "type": "string",
+                        "description": "The most recent excerpt title where the character appeared"
+                    },
+                    "relationships": {
+                        "type": "array",
+                        "description": "List of the character's current relationships with other characters at the current point in the story",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "relatedCharacter": {
+                                    "type": "string",
+                                    "description": "The name of the related character"
+                                },
+                                "relationshipType": {
+                                    "type": "string",
+                                    "description": "Description of the relationship (e.g., friend, enemy, family)"
+                                }
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "plotPoints": {
+            "type": "array",
+            "description": "List of major events in the story. Update with new events with the new excerpt, focusing on the most recent developments",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "excerpt": {
+                        "type": "string",
+                        "description": "The excerpt title where the event occurs"
+                    },
+                    "event": {
+                        "type": "string",
+                        "description": "A detailed description of the plot event"
+                    },
+                    "characters": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of characters involved in this event and how they are involved"
+                    }
+                },
+                "required": [
+                    "excerpt",
+                    "event"
+                ]
+            }
+        },
+        "worldBuilding": {
+            "type": "object",
+            "description": "Details about the novel's setting and universe. Update with new information from each excerpt if necessary",
+            "properties": {
+                "settings": {
+                    "type": "array",
+                    "description": "List of important locations in the story",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the location"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "A detailed description of the location"
+                            },
+                            "excerptDetails": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string",
+                                    "properties": {
+                                        "excerpt": {
+                                            "type": "string",
+                                            "description": "Excerpt title where this location is featured"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "description": "Detailed Description of the location in this excerpt"
+                                        }
+                                    }
+                                },
+                                "description": "List of excerpt titles where this location is featured"
+                            }
+                        },
+                        "required": [
+                            "name"
+                        ]
+                    }
+                },
+                "magicSystem": {
+                    "type": "array",
+                    "description": "Key events or revelations about the magic or supernatural elements in the story",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "type": "string",
+                                "description": "Description of the magic system element introduced or explained"
+                            },
+                            "excerpt": {
+                                "type": "string",
+                                "description": "The excerpt title where this information is introduced"
+                            },
+                            "details": {
+                                "type": "string",
+                                "description": "Detailed explanation of the magic system element"
+                            }
+                        },
+                        "required": [
+                            "event",
+                            "excerpt"
+                        ]
+                    }
+                },
+                "technology": {
+                    "type": "array",
+                    "description": "Key technological elements or advancements in the story's world",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "type": "string",
+                                "description": "Description of the technological element introduced or explained"
+                            },
+                            "excerpt": {
+                                "type": "string",
+                                "description": "The excerpt title where this information is introduced"
+                            },
+                            "details": {
+                                "type": "string",
+                                "description": "Detailed explanation of the technological element"
+                            }
+                        },
+                        "required": [
+                            "event",
+                            "excerpt"
+                        ]
+                    }
+                },
+                "politics": {
+                    "type": "array",
+                    "description": "Key political events, systems, or conflicts in the story",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "type": "string",
+                                "description": "Description of the political event or system introduced"
+                            },
+                            "excerpt": {
+                                "type": "integer",
+                                "description": "The excerpt title where this information is introduced"
+                            },
+                            "details": {
+                                "type": "string",
+                                "description": "Detailed explanation of the political element"
+                            }
+                        },
+                        "required": [
+                            "event",
+                            "excerpt"
+                        ]
+                    }
+                },
+                "history": {
+                    "type": "array",
+                    "description": "Important historical events or backstory relevant to the plot",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "event": {
+                                "type": "string",
+                                "description": "Description of the historical event or backstory element"
+                            },
+                            "excerpt": {
+                                "type": "string",
+                                "description": "The excerpt title where this information is introduced"
+                            },
+                            "details": {
+                                "type": "string",
+                                "description": "Detailed explanation of the historical event or backstory"
+                            }
+                        },
+                        "required": [
+                            "event",
+                            "excerpt"
+                        ]
+                    }
+                }
+            }
+        },
+        "themes": {
+            "type": "array",
+            "description": "Major themes explored in the novel",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name or title of the theme"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "A detailed explanation of the theme"
+                    },
+                    "examples": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "description": "List of examples or instances where this theme is explored in the story"
+                    }
+                },
+                "required": [
+                    "name"
+                ]
+            }
+        },
+        "timeline": {
+            "type": "array",
+            "description": "Chronological list of events in the story's world",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "date": {
+                        "type": "string",
+                        "description": "The date or time period of the event, if specified"
+                    },
+                    "event": {
+                        "type": "string",
+                        "description": "Description of the event"
+                    },
+                    "excerpt": {
+                        "type": "integer",
+                        "description": "The excerpt title where this event is mentioned or occurs"
+                    }
+                },
+                "required": [
+                    "event",
+                    "excerpt"
+                ]
+            }
+        },
+        "references": {
+            "type": "array",
+            "description": "Cultural, historical, or literary references and allusions found in the novel",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "description": "The type of reference (e.g., literary, historical, cultural, mythological)",
+                        "enum": [
+                            "literary",
+                            "historical",
+                            "cultural",
+                            "mythological",
+                            "other"
+                        ]
+                    },
+                    "reference": {
+                        "type": "string",
+                        "description": "The specific work, event, or concept being referenced"
+                    },
+                    "context": {
+                        "type": "string",
+                        "description": "How the reference is used in the novel"
+                    },
+                    "excerpt": {
+                        "type": "integer",
+                        "description": "The excerpt title where this reference appears"
+                    },
+                    "explanation": {
+                        "type": "string",
+                        "description": "Explanation of the reference and its significance"
+                    }
+                },
+                "required": [
+                    "type",
+                    "reference",
+                    "excerpt"
+                ]
+            }
+        }
+    },
+    "additionalProperties": false,
+    "required": [
+        "novelInfo",
+        "summary",
+        "characters",
+        "plotPoints"
+    ]
+}
