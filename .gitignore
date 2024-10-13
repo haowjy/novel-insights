@@ -160,4 +160,9 @@ cython_debug/
 #.idea/
 
 data/*
+!data/frankenstein.epub
+!data/grapes-of-wrath.epub
+!data/outlaw-of-torn.epub
 output/*
+
+.DS_Store

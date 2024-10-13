@@ -17,3 +17,5 @@ anthropic
 fanficfare==4.32.3
 
 lxml
+
+streamlit
