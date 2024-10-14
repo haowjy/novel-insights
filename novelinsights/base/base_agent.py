@@ -4,6 +4,7 @@ from novelinsights.utils import get_estimator
 
 class BaseAgent():
     def __init__(self, llm: LLMWrapper):
+        self.resp_history = []
         self.llm = llm
         
     def prompt(self) -> str:
