@@ -2,9 +2,10 @@ from typing import Callable
 
 try:
     import tiktoken
-    
 except ImportError:
     pass
+
+from llama_index.core.utils import Tokenizer
 
 def simple_token_estimator(text: str) -> int:
     """Simple token estimator that estimates the number of tokens based on:
@@ -26,9 +27,8 @@ def simple_token_estimator(text: str) -> int:
     tokens_count_char_est = char_count / 4.0
     return (tokens_count_word_est + tokens_count_char_est) / 2
 
-def GET_ESTIMATOR(source: str='simple', encoding_name:str='cl100k_base') -> Callable[[str], int]:
-        """Use the tiktoken library to estimate the number of tokens in a text.
-        See [tiktoken](https://github.com/openai/tiktoken) for more information. 
+def get_estimator(tokenizer: str | Tokenizer = 'simple') -> Callable[[str], int]:
+        """estimate the number of tokens in a text.
 
         Args:
             source (str, optional): Source of the estimator. I.e. "openai" or "tiktoken" for the tiktoken library. 'simple' for a simple estimator. Defaults to 'simple'.
@@ -37,11 +37,18 @@ def GET_ESTIMATOR(source: str='simple', encoding_name:str='cl100k_base') -> Call
         Returns:
             Callable[[str], int]: A function that takes a string and returns the number of tokens in the string.
         """
-        if source.lower() == 'simple':
+        if tokenizer == 'simple' or tokenizer is None:
             return simple_token_estimator
-        try:
-            if source.lower() == 'openai' or source.lower() == 'tiktoken':
-                encoding = tiktoken.get_encoding(encoding_name=encoding_name)
+        
+        if isinstance(tokenizer, str):
+            try:
+                encoding = tiktoken.get_encoding(tokenizer)
                 return lambda x: len(encoding.encode(x))
-        except ImportError:
-            pass
+            except: # ImportError or AttributeError
+                return simple_token_estimator
+        
+        elif isinstance(tokenizer, Tokenizer): # why is a string a tokenizer???
+                return lambda x: len(tokenizer.encode(x))
+        
+        # if all else, just use the simple estimator
+        return simple_token_estimator

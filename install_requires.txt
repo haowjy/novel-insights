@@ -11,8 +11,8 @@ ebook-tree-parser
 Unidecode
 python-dotenv
 
-openai
-anthropic
+llama-index-llms-openai
+llama-index-llms-anthropic
 
 fanficfare==4.32.3
 
