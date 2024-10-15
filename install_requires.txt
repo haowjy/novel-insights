@@ -15,7 +15,7 @@ llama-index-llms-openai
 llama-index-llms-anthropic
 
 fanficfare==4.32.3
-
 lxml
 
 streamlit
+qdrant-client

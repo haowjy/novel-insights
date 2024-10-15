@@ -4,6 +4,7 @@ from typing import Optional
 
 from novelinsights.base.base_agent import BaseAgent
 from novelinsights.base.base_llm import LLMWrapper
+from qdrant_client import QdrantClient
 
 def task() -> str:
     return """Your task is to produce a comprehensive and detailed summary of the current chapter, as well as extract and organize all significant information into predefined categories: Characters, Chronology, Locations, Organizations, Things, and Concepts. The output should be thorough and suitable for creating Wikipedia-style entries, ensuring that all essential details from the chapter are captured accurately."""
@@ -11,9 +12,10 @@ def task() -> str:
 def instructions(prev_chap_context:str = None) -> str:
     instructions = """## Non-Plot Content
 - Identify if the chapter is for non-plot content (e.g., front matter, acknowledgments, table of contents, etc.)
-- If the chapter is non-plot content, you make skip step 2 and replace it with "<SKIPPED-EXTRACTION>"
+- If the chapter is non-plot content, you make skip Information Extraction and replace the content with "<SKIPPED-EXTRACTION>"
 
 ## Information Extraction
+
 For each category below, extract relevant details from the chapter. Present the information in a clear and organized manner, using bullet points or numbered lists where appropriate. If the chapter does not contain information for a specific category, you may omit it.
 
 For all items in each category, make sure to explain why you chose them and how they contribute to the plot of the entire story. Rank the importance of each item as very high, high, medium, low, or very low.
@@ -32,8 +34,6 @@ For all items in each category, make sure to explain why you chose them and how 
 
 ### Chronology
  - Identify and list the events that occur or are described in the chapter
- - MAKE SURE TO INCLUDE A OVERARCHING CONFLICT NAME OR TITLE
-     - The overarching conflict is a singular event or theme that ties together the various events in the plot and a major plot point in the story
  - For each event, provide a detailed description. Include (if available):
  - Name or title of the event
  - Type or category of the event
@@ -90,6 +90,14 @@ For all items in each category, make sure to explain why you chose them and how 
  - any connections to other concepts or themes
  - any other relevant details
 
+### Story Arc
+- Identify and describe the overarching conflict or main storyline based on this chapter and previous context
+- Provide a detailed description of the conflict. Include (if available):
+    - Proper name or title of the conflict
+    - Description of the conflict
+    - any history or background information
+    - any other relevant details
+
 ## General Chapter Summary
 - Write a detailed summary of the entire chapter (approximately 300-500 words).
 - Focus on key plot developments, character actions and interactions, significant events, and any important revelations.
@@ -102,10 +110,9 @@ For all items in each category, make sure to explain why you chose them and how 
 def general_reminders() -> str:
     return """- Do not use external knowledge or information beyond what is provided in the chapter and previous context.
 - Stick strictly to the information in the chapter context and prior story summaries.
-- Ensure that any information extracted is directly from the source material and not inferred from outside knowledge.
-- Keep responses organized according to the specified structure and formatting instructions.
-- Make sure to follow the markdown formatting for clear and readable responses.
-- DO NOT explicitly mention "chapter" or "book" in the response. Instead, refer to the content as if it were a standalone piece of information."""
+- DO NOT explicitly mention "chapter" or "book" in the response. Instead, refer to the content as if it were a standalone piece of information.
+- Make sure to follow the exact markdown format and structure provided in the instructions with ALL headings and subheadings including the number of hashes '#' (like ## Information Extraction).
+"""
 
 def template(title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> str:
     """Generate a prompt for the read chapter agent.
@@ -121,10 +128,7 @@ def template(title:str, content:str, story_so_far: str = None, prev_chap_context
     """
     #
     prompt = f"""# Task
-{task()}
-
-# Instructions
-{instructions(prev_chap_context)}"""
+{task()}"""
     #
     if story_so_far is not None:
       prompt+=f"""
@@ -143,6 +147,11 @@ def template(title:str, content:str, story_so_far: str = None, prev_chap_context
 ---
 {content}
 ---
+
+# Instructions
+---
+{instructions(prev_chap_context)}
+---
 # General Reminders
 {general_reminders()}"""
     #
@@ -156,23 +165,32 @@ class ReadChapterExtraction(BaseModel):
     organizations: str
     things: str
     concepts: str
+    main_arc: str
 
-class ReadChapterResponse:
+class ReadChapterResponse(BaseModel):
     full_response: str
     skipped_info_extraction: bool
     info_extraction: Optional[ReadChapterExtraction] = None
     chapter_summary: str
-    
-    def __init__(self, response: str):
-        self.full_response = response
-        
-        self.skipped_info_extraction = "<SKIPPED-EXTRACTION>" in response
-        
-        split1 = response.split("## General Summary")
-        self.chapter_summary="## Chapter Summary"+split1[1]
-        
-        if self.skipped_info_extraction:
-            self.info_extraction = None
+
+    def parse_response(response:str) -> "ReadChapterResponse":
+        """Parse the response from the read chapter agent into the response model.
+
+        Args:
+            response (str): response from the read chapter agent
+
+        Returns:
+            ReadChapterResponse: parsed response model
+        """
+        full_response = response
+
+        skipped_info_extraction = "<SKIPPED-EXTRACTION>" in response
+
+        split1 = response.split("## General Chapter Summary")
+        chapter_summary="## Chapter Summary"+split1[1]
+
+        if skipped_info_extraction:
+            info_extraction = None
         else:
             split2 = split1[0].split("## Information Extraction")
             text_extraction=split2[1].strip()
@@ -184,17 +202,21 @@ class ReadChapterResponse:
             organizations = "###"+extract_split[4]
             things = "###"+extract_split[5]
             concepts = "###"+extract_split[6]
-            self.info_extraction = ReadChapterExtraction(characters=characters, 
+            main_arc = "###"+extract_split[7]
+            info_extraction = ReadChapterExtraction(characters=characters, 
                                   events=events, 
                                   locations=locations, 
                                   organizations=organizations, 
                                   things=things, 
-                                  concepts=concepts)
+                                  concepts=concepts,
+                                  main_arc=main_arc)
+        return ReadChapterResponse(full_response=full_response, skipped_info_extraction=skipped_info_extraction, info_extraction=info_extraction, chapter_summary=chapter_summary)
 
 class ReadChapterAgent(BaseAgent):
     """Agent class for generating a single chapter summary and information extraction tasks."""
-    def __init__(self, llm: LLMWrapper):
+    def __init__(self, llm: LLMWrapper, client: QdrantClient):
         super().__init__(llm)
+        self.client = client
     
     def mock_template(self) -> str:
         """Generate a mock template for the single chapter agent."""
@@ -217,7 +239,22 @@ class ReadChapterAgent(BaseAgent):
     def estimate_response_tokens(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> int:
         return super().estimate_response_tokens(self.prompt(title, content, story_so_far, prev_chap_context))
     
-    def generate_response(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> str:
+    def response_fields(self) -> dict:
+        return ReadChapterResponse.model_fields
+    
+    def _store_response(self, response: ReadChapterResponse):
+        """Store the response in the Qdrant database.
+        
+        Args:
+            prompt (str): prompt used to generate the response
+            response (str): response generated by the agent
+        """
+        payload = {
+            "prompt": response.full_response,
+            "response": response.dict()
+        }
+    
+    def generate(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> ReadChapterResponse:
         """Generate a response for the single chapter agent.
         
         Args:
@@ -229,7 +266,25 @@ class ReadChapterAgent(BaseAgent):
         Returns:
             str: response generated by the single chapter agent
         """
-        resp = self.llm.generate_response(self.prompt(title, content, story_so_far, prev_chap_context))
-        self.last_response = ReadChapterResponse(resp)
-        self.resp_history.append(self.last_response)
-        return self.resp_history[-1]
+        prompt = self.prompt(title, content, story_so_far, prev_chap_context)
+        resp_str = super().generate(prompt)
+        self.last_response: ReadChapterResponse = ReadChapterResponse.parse_response(resp_str)
+        return self.last_response
+    
+    def _mock_generate(self, response:str, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> ReadChapterResponse:
+        """Add the response to the agent history without actually calling the LLM. Used for testing.
+        
+        Args:
+            response (str): response to add to the agent history
+            title (str): title of the chapter
+            content (str): content of the chapter
+            story_so_far (str, optional): summary of the story so far. Defaults to None.
+            prev_chap_context (str, optional): context of the previous chapter. Defaults to None.
+            
+        Returns:
+            ReadChapterResponse: parsed response model
+        """
+        prompt = self.prompt(title, content, story_so_far, prev_chap_context)
+        super()._mock_generate(prompt, response)
+        self.last_response: ReadChapterResponse = ReadChapterResponse.parse_response(response)
+        return self.last_response

@@ -22,7 +22,7 @@ class LLMWrapper:
         """Complete a prompt with the LLM model."""
         return self.llm.complete(prompt)
         
-    def generate_response(self, prompt: Union[str, List[ChatMessage]], system_prompt: str="") -> str:
+    def generate(self, prompt: Union[str, List[ChatMessage]], system_prompt: str="") -> str:
         """Generate a response from the LLM model given a chat message."""
         this_system_prompt = system_prompt if system_prompt else self.system_prompt
         
