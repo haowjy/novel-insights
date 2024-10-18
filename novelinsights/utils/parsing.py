@@ -6,7 +6,7 @@ def parse_json(json_str:str) -> dict:
     json_str = json_str.strip()
     # find the last ``` in the string
     end = json_str.rfind("```")
-    print(end)
+    
     if end == -1:
         return None
     # find the start of the based on the second last ``` in the string

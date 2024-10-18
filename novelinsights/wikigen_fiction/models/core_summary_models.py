@@ -5,10 +5,12 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List
+from typing import List, Literal, Optional
 import jsonref
 
 from pydantic import BaseModel, Field
+
+from novelinsights.base.base_wg_fiction_payload import BaseLLMPayload
 
 
 class Status(Enum):
@@ -46,3 +48,33 @@ class CoreSummaryModel(BaseModel):
         ret = jsonref.replace_refs(super(CoreSummaryModel,CoreSummaryModel).model_json_schema(), proxies=False)
         del ret['$defs']
         return ret
+
+class CoreSummaryResponse(BaseModel):
+    """Core Summary Agent Response Model"""
+    full_response: str
+    core_summary_json: Optional[dict] = None # CoreSummaryModel, but LLM could potentially get it wrong, so we'll just use dict for now
+    
+class CoreSummaryPayload(BaseLLMPayload):
+    """Core Summary Payload Model"""
+    static_metadata: dict
+    type: Literal["core_summary"] = "core_summary"
+    response: CoreSummaryResponse
+    
+if __name__ == "__main__":
+    model = CoreSummaryModel(
+        genres=["fantasy"], 
+        setting="A world of magic and mystery", 
+        overall_summary="A tale of adventure and heroism", 
+        plot_overview=[{"arc_name":"The Beginning","description":"The start of the journey","status":"ongoing"}])
+    response = CoreSummaryResponse(
+        full_response="Response from the core summary agent", 
+        core_summary_json=model.model_dump())
+    payload = CoreSummaryPayload(
+        name="Book Title",
+        static_metadata={
+            "author":"Author Name",
+            },
+        prompt="Prompt used to generate this summary", # we are not going to save the prompt in the database
+        response=response,
+        
+        )

@@ -1,16 +1,18 @@
 
-from novelinsights.base.base_llm import LLMWrapper
-from novelinsights.utils import get_estimator
+from abc import abstractmethod
+from novelinsights.utils import get_estimator,LLMWrapper
 from typing import List
 from pydantic import BaseModel
 from qdrant_client import QdrantClient
+import logging
 
 class AgentHistory(BaseModel):
     prompt: str
     response: str
 
 class BaseAgent():
-    def __init__(self, llm: LLMWrapper):
+    @abstractmethod
+    def __init__(self, llm: LLMWrapper, db: QdrantClient):
         """Base class for an agent that interacts with an LLM model.
         
         Args:
@@ -20,24 +22,37 @@ class BaseAgent():
         self.agent_history:List[AgentHistory] = []
         
         self.llm = llm
+        self.db = db
         
-    def prompt(self) -> str:
+    @abstractmethod
+    def get_prompt(self) -> str:
         raise NotImplementedError("prompt method must be implemented in derived class")
     
+    @abstractmethod
+    def get_response_fields(self) -> dict:
+        return NotImplementedError("response_fields method must be implemented in derived class")
+    
+    @abstractmethod
     def generate(self, prompt: str) -> str:
         resp_str = self.llm.generate(prompt)
+        logging.debug(f"prompt tokens: {self.llm.estimate_tokens(prompt)}")
+        logging.debug(f"response tokens: {self.llm.estimate_tokens(resp_str)}")
         self.agent_history.append(AgentHistory(prompt=prompt, response=resp_str))
         return resp_str
     
+    @abstractmethod
     def _mock_generate(self, prompt: str, response: str) -> str:
         """Mock the generate method for testing purposes."""
+        logging.debug(f"prompt tokens: {self.llm.estimate_tokens(prompt)}")
+        logging.debug(f"response tokens: {self.llm.estimate_tokens(response)}")
         self.agent_history.append(AgentHistory(prompt=prompt, response=response))
         return response
     
-    def estimate_response_tokens(self, prompt: str) -> int:
+    @abstractmethod
+    def estimate_tokens(self, prompt: str) -> int:
         if self.llm is None:
             return get_estimator()(prompt) 
-        return self.llm.estimate_response_tokens(prompt)
+        return self.llm.estimate_tokens(prompt)
     
     def __repr__(self) -> str:
         return self.llm.__repr__()

@@ -1,10 +1,13 @@
 """This module contains the agent class for to read a single chapter and generate a comprehensive summary and information extraction tasks."""
-from pydantic import BaseModel
-from typing import Optional
 
+import logging 
+
+from typing import Self
 from novelinsights.base.base_agent import BaseAgent
-from novelinsights.base.base_llm import LLMWrapper
-from qdrant_client import QdrantClient
+from novelinsights.utils.llm import LLMWrapper
+from novelinsights.db import QdrantDB
+
+from novelinsights.wikigen_fiction.models.read_chapter_models import ReadChapterPayload, ReadChapterResponse
 
 def task() -> str:
     return """Your task is to produce a comprehensive and detailed summary of the current chapter, as well as extract and organize all significant information into predefined categories: Characters, Chronology, Locations, Organizations, Things, and Concepts. The output should be thorough and suitable for creating Wikipedia-style entries, ensuring that all essential details from the chapter are captured accurately."""
@@ -90,7 +93,7 @@ For all items in each category, make sure to explain why you chose them and how 
  - any connections to other concepts or themes
  - any other relevant details
 
-### Story Arc
+### Major Conflict(s)
 - Identify and describe the overarching conflict or main storyline based on this chapter and previous context
 - Provide a detailed description of the conflict. Include (if available):
     - Proper name or title of the conflict
@@ -157,72 +160,20 @@ def template(title:str, content:str, story_so_far: str = None, prev_chap_context
     #
     return prompt
 
-
-class ReadChapterExtraction(BaseModel):
-    characters: str
-    events: str
-    locations: str
-    organizations: str
-    things: str
-    concepts: str
-    main_arc: str
-
-class ReadChapterResponse(BaseModel):
-    full_response: str
-    skipped_info_extraction: bool
-    info_extraction: Optional[ReadChapterExtraction] = None
-    chapter_summary: str
-
-    def parse_response(response:str) -> "ReadChapterResponse":
-        """Parse the response from the read chapter agent into the response model.
-
-        Args:
-            response (str): response from the read chapter agent
-
-        Returns:
-            ReadChapterResponse: parsed response model
-        """
-        full_response = response
-
-        skipped_info_extraction = "<SKIPPED-EXTRACTION>" in response
-
-        split1 = response.split("## General Chapter Summary")
-        chapter_summary="## Chapter Summary"+split1[1]
-
-        if skipped_info_extraction:
-            info_extraction = None
-        else:
-            split2 = split1[0].split("## Information Extraction")
-            text_extraction=split2[1].strip()
-
-            extract_split = text_extraction.split("###")
-            characters = "###"+extract_split[1]
-            events = "###"+extract_split[2]
-            locations = "###"+extract_split[3]
-            organizations = "###"+extract_split[4]
-            things = "###"+extract_split[5]
-            concepts = "###"+extract_split[6]
-            main_arc = "###"+extract_split[7]
-            info_extraction = ReadChapterExtraction(characters=characters, 
-                                  events=events, 
-                                  locations=locations, 
-                                  organizations=organizations, 
-                                  things=things, 
-                                  concepts=concepts,
-                                  main_arc=main_arc)
-        return ReadChapterResponse(full_response=full_response, skipped_info_extraction=skipped_info_extraction, info_extraction=info_extraction, chapter_summary=chapter_summary)
-
 class ReadChapterAgent(BaseAgent):
     """Agent class for generating a single chapter summary and information extraction tasks."""
-    def __init__(self, llm: LLMWrapper, client: QdrantClient):
-        super().__init__(llm)
-        self.client = client
+    def __init__(self, llm: LLMWrapper, db: QdrantDB):
+        self.response:ReadChapterResponse = None
+        self.payload:ReadChapterPayload = None
+        super().__init__(llm, db)
     
     def mock_template(self) -> str:
         """Generate a mock template for the single chapter agent."""
-        return template(r"{{title}}", r"{{content}}", r"<OPT>{{story_so_far}}</OPT>", r"<OPT>{{prev_chap_context}}</OPT>")
+        p = template(r"{{title}}", r"{{content}}", r"<OPT>{{story_so_far}}</OPT>", r"<OPT>{{prev_chap_context}}</OPT>")
+        logging.debug(f"mock prompt tokens: {self.llm.estimate_tokens(p)}")
+        return p
     
-    def prompt(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> str:
+    def get_prompt(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> str:
         """Generate a prompt for the single chapter agent.
         
         Args:
@@ -234,27 +185,16 @@ class ReadChapterAgent(BaseAgent):
         Returns:
             str: full prompt for the single chapter agent
         """
-        return template(title, content, story_so_far, prev_chap_context)
+        p = template(title, content, story_so_far, prev_chap_context)
+        return p
     
-    def estimate_response_tokens(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> int:
-        return super().estimate_response_tokens(self.prompt(title, content, story_so_far, prev_chap_context))
+    def estimate_tokens(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> int:
+        return super().estimate_tokens(self.get_prompt(title, content, story_so_far, prev_chap_context))
     
-    def response_fields(self) -> dict:
+    def get_response_fields(self) -> dict:
         return ReadChapterResponse.model_fields
     
-    def _store_response(self, response: ReadChapterResponse):
-        """Store the response in the Qdrant database.
-        
-        Args:
-            prompt (str): prompt used to generate the response
-            response (str): response generated by the agent
-        """
-        payload = {
-            "prompt": response.full_response,
-            "response": response.dict()
-        }
-    
-    def generate(self, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> ReadChapterResponse:
+    def generate(self, chap_num:int, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> Self:
         """Generate a response for the single chapter agent.
         
         Args:
@@ -266,12 +206,19 @@ class ReadChapterAgent(BaseAgent):
         Returns:
             str: response generated by the single chapter agent
         """
-        prompt = self.prompt(title, content, story_so_far, prev_chap_context)
+        prompt = self.get_prompt(title, content, story_so_far, prev_chap_context)
+        
         resp_str = super().generate(prompt)
-        self.last_response: ReadChapterResponse = ReadChapterResponse.parse_response(resp_str)
-        return self.last_response
+        self.response = ReadChapterResponse.from_response(resp_str)
+        self.payload = ReadChapterPayload(
+            name=title, 
+            prompt=prompt, 
+            response=self.response, 
+            chap_num=chap_num
+            )
+        return self
     
-    def _mock_generate(self, response:str, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> ReadChapterResponse:
+    def _mock_generate(self, response:str, chap_num:int, title:str, content:str, story_so_far: str = None, prev_chap_context: str = None) -> Self:
         """Add the response to the agent history without actually calling the LLM. Used for testing.
         
         Args:
@@ -284,7 +231,13 @@ class ReadChapterAgent(BaseAgent):
         Returns:
             ReadChapterResponse: parsed response model
         """
-        prompt = self.prompt(title, content, story_so_far, prev_chap_context)
+        prompt = self.get_prompt(title, content, story_so_far, prev_chap_context)
         super()._mock_generate(prompt, response)
-        self.last_response: ReadChapterResponse = ReadChapterResponse.parse_response(response)
-        return self.last_response
+        self.response: ReadChapterResponse = ReadChapterResponse.from_response(response)
+        self.payload = ReadChapterPayload(
+            name=title, 
+            prompt=prompt, 
+            response=self.response, 
+            chap_num=chap_num
+            )
+        return self

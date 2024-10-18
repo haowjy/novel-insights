@@ -10,12 +10,6 @@ import jsonref
 
 from pydantic import BaseModel, Field
 
-class EntityType(Enum):
-    character = 'character'
-    monster = 'monster'
-    abstract_force = 'abstract_force'
-
-
 class Description(BaseModel):
     appearance: Optional[str] = Field(
         None, description='Physical description or manifestation of the entity'
@@ -29,7 +23,6 @@ class Description(BaseModel):
         description='Key abilities, powers, or notable effects associated with the entity',
     )
 
-
 class Connection(BaseModel):
     name: Optional[str] = None
     relation: Optional[str] = None
@@ -41,15 +34,12 @@ class CharacterModel(BaseModel):
         extra = 'forbid'
 
     name: str = Field(..., description="The entity's primary name or identifier")
-    entity_type: EntityType = Field(
-        ..., description='The type of entity being described'
-    )
     aliases: Optional[List[str]] = Field(
         None, description='Alternative names or identifiers'
     )
     overview: str = Field(
         ...,
-        description='A concise summary of the entity, including its essence, role, and key traits',
+        description='A concise summary of the character, including its essence, role, and key traits',
     )
     significance: str = Field(
         ...,

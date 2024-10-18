@@ -43,7 +43,7 @@ class LLMWrapper:
         
         return response
     
-    def estimate_response_tokens(self, prompt: str) -> int:
+    def estimate_tokens(self, prompt: str) -> int:
         """Estimate the number of tokens in the response given a prompt."""
         return self.estimator(prompt)
     
