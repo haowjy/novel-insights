@@ -18,6 +18,16 @@ Then
 pip install -r requirements.txt
 ```
 
+### Database setup (postgres)
+
+```bash
+docker pull pgvector/pgvector:pg17
+```
+
+```bash
+docker run -i -t --rm --name pgvector -p 5432:5432 -e POSTGRES_PASSWORD=pgvector -e POSTGRES_USER=pgvector -e POSTGRES_DB=pgvector pgvector/pgvector:pg17
+```
+
 ### Pandoc, universal document converter
 
 ```bash

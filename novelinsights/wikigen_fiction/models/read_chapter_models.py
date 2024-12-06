@@ -5,20 +5,18 @@ from novelinsights.base.base_wg_fiction_payload import BaseLLMPayload
 
 class ReadChapterExtraction(BaseModel):
     chapter_summary: str
+    key_events: Optional[str]
+    plot_elements: Optional[str]
     characters: Optional[str]
-    chap_events: Optional[str]
-    locations: Optional[str]
-    organizations: Optional[str]
-    things: Optional[str]
-    concepts: Optional[str]
-    main_conflicts: Optional[str]
+    world_building: Optional[str]
+    items: Optional[str]
 
 class ReadChapterResponse(BaseModel):
     full_response: str
     skipped_info_extraction: bool
     info_extraction: ReadChapterExtraction
 
-    def from_response(response:str) -> "ReadChapterResponse":
+    def from_response(response: str) -> "ReadChapterResponse":
         """Parse the LLM response string from the read chapter agent into the response model.
 
         Args:
@@ -27,45 +25,48 @@ class ReadChapterResponse(BaseModel):
         Returns:
             ReadChapterResponse: parsed response model
         """
-        full_response = response
-
         skipped_info_extraction = "<SKIPPED-EXTRACTION>" in response
+        full_response = response
+        
+        # Remove ## 1. Non-Plot Content
 
-        split1 = response.split("## General Chapter Summary")
-        chapter_summary="## Chapter Summary"+split1[1]
+        split_12_3 = response.partition("## 3.")  ## 3. General Chapter Summary
+        chapter_summary = "##" + split_12_3[2]
 
         if skipped_info_extraction:
             info_extraction = ReadChapterExtraction(chapter_summary=chapter_summary)
         else:
-            split2 = split1[0].split("## Information Extraction")
-            if split2[1]:
-                text_extraction=split2[1].strip()
+            full_response = "##" + response.partition("## 2.")[2]  #
+            split_1_2 = split_12_3[0].partition("## 2.")  # ## 2. Information Extraction
+            if split_1_2[2]:
+                info_extract = split_1_2[2].strip()
+                info_extract = info_extract.split("###")
 
-                extract_split = text_extraction.split("###")
-                characters = "###"+extract_split[1] if extract_split[1] else None
-                chap_events = "###"+extract_split[2] if extract_split[2] else None
-                locations = "###"+extract_split[3] if extract_split[3] else None
-                organizations = "###"+extract_split[4] if extract_split[4] else None
-                things = "###"+extract_split[5] if extract_split[5] else None
-                concepts = "###"+extract_split[6] if extract_split[6] else None
-                main_conflicts = "###"+extract_split[7] if extract_split[7] else None
-            info_extraction = ReadChapterExtraction(characters=characters, 
-                                chap_events=chap_events, 
-                                locations=locations, 
-                                organizations=organizations, 
-                                things=things, 
-                                concepts=concepts,
-                                main_conflicts=main_conflicts,
-                                chapter_summary=chapter_summary)
+                key_events = "###" + info_extract[1] if info_extract[1] else None
+                plot_elements = "###" + info_extract[2] if info_extract[2] else None
+                characters = "###" + info_extract[3] if info_extract[3] else None
+                world_building = "###" + info_extract[4] if info_extract[4] else None
+                items = "###" + info_extract[5] if info_extract[5] else None
+
+            info_extraction = ReadChapterExtraction(
+                key_events=key_events,
+                plot_elements=plot_elements,
+                characters=characters,
+                world_building=world_building,
+                items=items,
+                chapter_summary=chapter_summary,
+            )
         return ReadChapterResponse(
-            full_response=full_response, 
-            skipped_info_extraction=skipped_info_extraction, 
-            info_extraction=info_extraction, 
-            chapter_summary=chapter_summary)
+            full_response=full_response,
+            skipped_info_extraction=skipped_info_extraction,
+            info_extraction=info_extraction,
+            chapter_summary=chapter_summary,
+        )
 
 # Qdrant Payload to store
 class ReadChapterPayload(BaseLLMPayload):
     """Read Chapter Payload Model"""
+
     type: Literal["read_chapter"] = "read_chapter"
     response: ReadChapterResponse
     chap_num: int

@@ -18,4 +18,4 @@ fanficfare==4.32.3
 lxml
 
 streamlit
-qdrant-client
+psycopg2-binary
