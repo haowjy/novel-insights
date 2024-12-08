@@ -3,7 +3,7 @@ name = "novelinsights"
 version = "0.1.0"
 description = "AI-powered platform for tracking and summarizing book series"
 authors = ["Jimmy Yao <jinghaoyao@gmail.com>"]
-readme = "README.md"
+readme = "../../README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"

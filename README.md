@@ -6,12 +6,30 @@ Quickly obtain insights about a text.
 
 ### Backend
 
+#### Running the Backend (and Database)
+
+  ```bash
+  docker-compose up
+  ```
+
+- The FastAPI server will be running on `http://localhost:8000`
+- The database will be running on `http://localhost:5432`
+- The database adminer will be running on `http://localhost:5050`
+
+To just run the database:
+
+  ```bash
+  docker-compose up postgres
+  ```
+
+#### Running fastapi without docker (local development)
+
 1. [Poetry Installation Guide](https://python-poetry.org/docs/#installing-with-pipx)
 
 2. Navigate to the backend fastapi directory
   
     ```bash
-    cd backend/novelinsights
+    cd backend/novelinsights/src
     ```
 
 3. Install all dependencies including development ones
@@ -29,24 +47,8 @@ Quickly obtain insights about a text.
 5. Run the FastAPI server
 
     ```bash
-    uvicorn main:app --reload
+    uvicorn novelinsights.main:app --reload
     ```
-
-#### Running the Backend (and Database)
-
-  ```bash
-  docker-compose up
-  ```
-
-- The FastAPI server will be running on `http://localhost:8000`
-- The database will be running on `http://localhost:5432`
-- The database adminer will be running on `http://localhost:5050`
-
-To just run the database:
-
-  ```bash
-  docker-compose up postgres
-  ```
 
 ### Frontend
 
