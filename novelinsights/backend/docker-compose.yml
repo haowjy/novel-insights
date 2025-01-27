@@ -34,13 +34,13 @@ services:
 
   fastapi:
     build:
-      context: ./src
-      dockerfile: Dockerfile # backend/src/Dockerfile
+      context: ./app
+      dockerfile: Dockerfile # backend/app/Dockerfile
       target: ${APP_ENV:-dev}    # Uses APP_ENV from .env, defaults to development
     volumes:
-      - ./src:/opt/pysetup/src
-      - ./src/pyproject.toml:/opt/pysetup/pyproject.toml
-      - ./src/poetry.lock:/opt/pysetup/poetry.lock
+      - ./app:/opt/pysetup/app
+      - ./app/pyproject.toml:/opt/pysetup/pyproject.toml
+      - ./app/poetry.lock:/opt/pysetup/poetry.lock
     ports:
       - "8000:8000"
     environment:

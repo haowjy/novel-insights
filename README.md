@@ -1,12 +1,16 @@
 # Novel Insights
 
-Quickly obtain insights about a text.
+Quickly obtain insights about text.
 
 ## Dev Set Up
 
 ### Backend
 
 #### Running the Backend (and Database)
+
+  ```bash
+  cd novelinsights/backend
+  ```
 
   ```bash
   docker-compose up
@@ -29,13 +33,13 @@ To just run the database:
 2. Navigate to the backend fastapi directory
   
     ```bash
-    cd backend/novelinsights/src
+    cd novelinsights/backend/app
     ```
 
 3. Install all dependencies including development ones
 
     ```bash
-    poetry install
+    poetry install --with dev
     ```
 
 4. Activate the virtual environment
@@ -47,7 +51,13 @@ To just run the database:
 5. Run the FastAPI server
 
     ```bash
-    uvicorn novelinsights.main:app --reload
+    uvicorn novelinsights.app:app --reload
+    ```
+
+6. Gracefully exit the virtual environment
+
+    ```bash
+    deactivate
     ```
 
 ### Frontend

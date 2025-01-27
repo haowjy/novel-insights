@@ -1,4 +1,4 @@
-# backend/src/Dockerfile
+# novelinsights/backend/app/Dockerfile
 FROM python:3.11-slim as base
 
 # Set environment variables

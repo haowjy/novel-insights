@@ -1,0 +1,18 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/novelinsights/backend/.venv/bin/python",
+    "python.analysis.extraPaths": ["${workspaceFolder}/novelinsights/backend"],
+    "python.terminal.activateEnvironment": true,
+    "python.poetryPath": "poetry",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    
+    // Optional: Set the integrated terminal's starting directory
+    "terminal.integrated.cwd": "${workspaceFolder}/novelinsights/backend",
+    
+    // Optional: Configure different files to open in different locations
+    "files.associations": {
+        "**/backend/**/*.py": "python",
+        "**/frontend/**/*.ts": "typescript",
+        "**/frontend/**/*.tsx": "typescriptreact"
+    }
+}

@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from novelinsights.api.routes import router as api_router
+
 app = FastAPI(title="Novel Insights")
 
 # Configure CORS
@@ -12,10 +14,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to Novel Insights API"}
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+app.include_router(api_router)
