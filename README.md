@@ -13,48 +13,69 @@ Quickly obtain insights about text.
   ```
 
   ```bash
+  # Start containers in foreground (see logs directly)
   docker-compose up
+
+  # Start containers in background (detached mode)
+  docker-compose up -d
+
+  # Rebuild containers and start (use after dependency changes)
+  docker-compose up --build
   ```
 
 - The FastAPI server will be running on `http://localhost:8000`
 - The database will be running on `http://localhost:5432`
 - The database adminer will be running on `http://localhost:5050`
 
+#### Running the database
+
 To just run the database:
 
   ```bash
-  docker-compose up postgres
+  docker-compose up postgres pgadmin
+  ```
+
+To update the database:
+
+  ```bash
+  ./migrate.sh "migration message"
   ```
 
 #### Running fastapi without docker (local development)
 
 1. [Poetry Installation Guide](https://python-poetry.org/docs/#installing-with-pipx)
 
-2. Navigate to the backend fastapi directory
-  
+2. (Optional) Make sure that poetry creates a virtual environment in the backend directory
+
     ```bash
-    cd novelinsights/backend/app
+    poetry config virtualenvs.in-project true
     ```
 
-3. Install all dependencies including development ones
+3. Navigate to the backend fastapi directory
+  
+    ```bash
+    cd novelinsights/backend
+    ```
+
+4. Install all dependencies including development ones
 
     ```bash
     poetry install --with dev
     ```
 
-4. Activate the virtual environment
+5. Activate the virtual environment
 
     ```bash
     poetry shell
     ```
 
-5. Run the FastAPI server
+6. Run the FastAPI server
 
     ```bash
-    uvicorn novelinsights.app:app --reload
+    uvicorn novelinsights.main:app --reload
     ```
 
-6. Gracefully exit the virtual environment
+7. Gracefully exit the virtual environment
 
     ```bash
     deactivate

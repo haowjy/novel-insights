@@ -1,17 +1,28 @@
-from .base import TimestampedBase
-from .user import User, UserType
-# from .book import Book
-# from .chapter import Chapter, ChapterSummary
-# from .author import Author
-# from .article import Article
+# novelinsights/models/__init__.py
+from novelinsights.models.base import Base
+from novelinsights.models.core.user import User
+from novelinsights.models.content.content_unit import ContentUnit
+from novelinsights.models.content.context import Context
+from novelinsights.models.content.structure import ContentStructure
+from novelinsights.models.knowledge.node import Node, NodeState
+from novelinsights.models.knowledge.relationship import NodeRelationship, NodeRelationshipState
+from novelinsights.models.metadata.agent_metadata import AgentMetadata
+from novelinsights.models.metadata.prompt_metadata import PromptMetadata
+from novelinsights.models.presentation.article import Article, ArticleSnapshot
 
+# This ensures all models are registered
 __all__ = [
-    'TimestampedBase',
-    'User',
-    'UserType',
-    # 'Book',
-    # 'Chapter',
-    # 'ChapterSummary',
-    # 'Author',
-    # 'Article',
+    "Base",
+    "User",
+    "ContentUnit",
+    "Context",
+    "ContentStructure",
+    "Node",
+    "NodeState",
+    "NodeRelationship",
+    "NodeRelationshipState",
+    "AgentMetadata",
+    "PromptMetadata",
+    "Article",
+    "ArticleSnapshot"
 ]

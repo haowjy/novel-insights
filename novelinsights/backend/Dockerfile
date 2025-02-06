@@ -1,4 +1,4 @@
-# novelinsights/backend/app/Dockerfile
+# novelinsights/backend/Dockerfile
 FROM python:3.11-slim as base
 
 # Set environment variables
@@ -6,19 +6,19 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     POETRY_VERSION=1.7.1 \
     POETRY_HOME="/opt/poetry" \
-    POETRY_VIRTUALENVS_IN_PROJECT=true \
+    POETRY_VIRTUALENVS_CREATE=false \
     POETRY_NO_INTERACTION=1 \
-    PYSETUP_PATH="/opt/pysetup" \
-    VENV_PATH="/opt/pysetup/.venv"
+    PYSETUP_PATH="/opt/pysetup"
 
-# Add Poetry and virtual environment paths to PATH
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
+# Add Poetry to PATH
+ENV PATH="$POETRY_HOME/bin:$PATH"
 
 # Install system dependencies and Poetry
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         build-essential \
+        git \
     && curl -sSL https://install.python-poetry.org | python3 - \
     && apt-get purge -y --auto-remove build-essential \
     && apt-get clean \
@@ -26,17 +26,25 @@ RUN apt-get update \
 
 WORKDIR $PYSETUP_PATH
 
-# Copy only poetry files first to leverage cache
+# Copy project files
 COPY pyproject.toml poetry.lock ./
+COPY . .
 
-# Development stage (includes all dependencies)
+# Development stage
 FROM base AS dev
-RUN poetry install --no-root
-COPY . .
-CMD ["poetry", "run", "uvicorn", "novelinsights.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+RUN poetry install --with dev
 
-# Production stage (excludes development dependencies)
+# Create an entrypoint script
+RUN echo '#!/bin/bash\n\
+alembic upgrade head\n\
+uvicorn novelinsights.main:app --host 0.0.0.0 --port 8000 --reload\n\
+' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
+
+# Production stage
 FROM base AS prod
-RUN poetry install --no-dev --no-root
-COPY . .
+RUN poetry install --without dev
+
 CMD ["poetry", "run", "gunicorn", "novelinsights.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]

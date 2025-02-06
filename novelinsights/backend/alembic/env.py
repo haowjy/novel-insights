@@ -1,9 +1,19 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import Connection, engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+from dotenv import load_dotenv
+import os
+
+import pgvector
+import alembic_postgresql_enum
+
+from novelinsights.models import Base
+# Load environment variables from .env file
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,13 +28,18 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
+# Construct database URL from environment variables
+db_url = f"postgresql://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}:{os.getenv('POSTGRES_PORT')}/{os.getenv('POSTGRES_DB')}"
+
+# Override sqlalchemy.url from alembic.ini
+config.set_main_option("sqlalchemy.url", db_url)
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -71,6 +86,20 @@ def run_migrations_online() -> None:
         with context.begin_transaction():
             context.run_migrations()
 
+
+def do_run_migrations(connection: Connection) -> None:
+    # Need to hack the "vector" type into postgres dialect schema types.
+    # Otherwise, `alembic check` does not recognize the type
+    connection.dialect.ischema_names['vector'] = project.database.migration_types.Vector # type: ignore
+
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        user_module_prefix="project.database.migration_types.",
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
 
 if context.is_offline_mode():
     run_migrations_offline()
