@@ -23,6 +23,26 @@ from sqlalchemy.orm import relationship
 from novelinsights.models.base import Base, CreationSourceType, TemporalSnapshotMixin, CoreBase
 
 
+"""
+
+This file contains the SQLAlchemy models for representing relationships in the knowledge graph.
+
+Key components:
+- Association tables for many-to-many relationships between relationships and contexts/content units
+- Enums defining relationship directions, types, and statuses
+- Models for relationship states and relationships themselves
+
+The models are used to represent connections between nodes in the knowledge graph, capturing:
+- Directionality (outbound, inbound, bidirectional)
+- Type (family, friendship, rivalry, etc.)
+- Status (active, dormant)
+- Temporal snapshots of relationship states
+- Associations with content units and contexts
+
+These models form the core of the relationship representation in the knowledge graph system.
+
+"""
+
 # NEW: Define the association table for Relationship <--> Context
 noderelationship_context = Table(
     "noderelationship_context",
@@ -41,7 +61,7 @@ noderelationship_contentunit = Table(
     Column('source', SQLEnum(CreationSourceType))
 )
 
-class RelationshipDirection(Enum):
+class RelationDirectionType(Enum):
     OUTBOUND = "outbound"         # Relationship from source to target
     INBOUND = "inbound"           # Relationship from target to source
     BIDIRECTIONAL = "bidirectional"  # Mutual relationship
@@ -68,58 +88,13 @@ class RelationType(Enum):
     CAUSATION = "causation"      # Cause-effect relationships
     OTHER = "other"              # Other types
 
-class RelationshipStatus(Enum):
+class RelationStatusType(Enum):
     ACTIVE = "active"           # Currently valid relationship
     DORMANT = "dormant"         # Temporarily inactive (e.g., characters separated)
     BROKEN = "broken"           # Explicitly ended (e.g., breakup, betrayal)
     DECEASED = "deceased"       # One party died
     HISTORICAL = "historical"   # Past relationship, no longer current
     UNKNOWN = "unknown"         # Status unclear or not specified
-
-class NodeRelationship(CoreBase):
-    """
-    A relationship represents a connection between two nodes in the knowledge graph.
-    Like nodes, relationships can have states that change over time/context.
-    """
-    __tablename__ = 'node_relationship'
-    
-    # Override creation source for relationships to default to AI
-    creation_source = Column(SQLEnum(CreationSourceType), 
-                         nullable=False, 
-                         default=CreationSourceType.AI,
-                         index=True)
-    
-    # Current overall status (derived from most recent state)
-    current_status = Column(SQLEnum(RelationshipStatus), 
-                          nullable=False, 
-                          default=RelationshipStatus.ACTIVE,
-                          index=True)
-    
-    # Core relationship fields
-    source_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
-    source_node = relationship(
-        "Node",
-        foreign_keys=[source_node_id])
-    
-    target_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
-    target_node = relationship(
-        "Node",
-        foreign_keys=[target_node_id])
-    
-    direction = Column(SQLEnum(RelationshipDirection), nullable=False, index=True)
-    
-    # Type classification
-    relationship_type = Column(SQLEnum(RelationType), nullable=False, index=True)
-    subtype = Column(String(255), index=True)  # Optional more specific type
-    additional_types = Column(ARRAY(String))   # Additional type classifications
-
-    # Relationship States
-    states = relationship(
-        'NodeRelationshipState', 
-        back_populates='node_relationship'
-        )
-    
-    
 
 class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
     """
@@ -138,9 +113,9 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
     node_relationship = relationship('NodeRelationship', back_populates='states')
 
     # Status at this point in content
-    status = Column(SQLEnum(RelationshipStatus), 
+    status = Column(SQLEnum(RelationStatusType), 
                    nullable=False, 
-                   default=RelationshipStatus.ACTIVE)
+                   default=RelationStatusType.ACTIVE)
     
     # AI-generated fields
     strength = Column(Integer, comment="1-5, 5 being the strongest connection")
@@ -149,6 +124,9 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
      # If we need structured data about the relationship, keep it focused on the connection
     properties = Column(JSONB,
         comment="""
+        Flexible schema for AI generated relationship properties
+        
+        Example:
         {
             "status": str,      # e.g., "active", "strained", "broken"
             "dynamics": str,    # e.g., "supportive", "antagonistic"
@@ -160,3 +138,54 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
     # Agent metadata if this state was created by an AI agent
     agent_metadata_id = Column(UUID(as_uuid=True), ForeignKey('agent_metadata.id'), nullable=False)
     agent_metadata = relationship('AgentMetadata')
+
+
+
+class NodeRelationship(CoreBase):
+    """
+    A relationship represents a connection between two nodes in the knowledge graph.
+    Like nodes, relationships can have states that change over time/context.
+    """
+    __tablename__ = 'node_relationship'
+    
+    # Override creation source for relationships to default to AI
+    creation_source = Column(SQLEnum(CreationSourceType), 
+                         nullable=False, 
+                         default=CreationSourceType.AI,
+                         index=True)
+    
+    # Current overall status (derived from most recent state)
+    current_status = Column(SQLEnum(RelationStatusType), 
+                          nullable=False, 
+                          default=RelationStatusType.ACTIVE,
+                          index=True)
+    
+    # Core relationship fields
+    source_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
+    source_node = relationship(
+        "Node",
+        foreign_keys=[source_node_id],
+        back_populates='relationships',
+        overlaps="relationships",
+        )
+    
+    target_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
+    target_node = relationship(
+        "Node",
+        foreign_keys=[target_node_id],
+        back_populates='relationships',
+        overlaps="relationships",
+        )
+    
+    direction = Column(SQLEnum(RelationDirectionType), nullable=False, index=True)
+    
+    # Type classification
+    relationship_type = Column(SQLEnum(RelationType), nullable=False, index=True)
+    subtype = Column(String(255), index=True)  # Optional more specific type
+    additional_types = Column(ARRAY(String))   # Additional type classifications
+
+    # Relationship States
+    states = relationship(
+        'NodeRelationshipState', 
+        back_populates='node_relationship'
+        )

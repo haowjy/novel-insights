@@ -16,11 +16,11 @@ Quickly obtain insights about text.
   # Start containers in foreground (see logs directly)
   docker-compose up
 
-  # Start containers in background (detached mode)
-  docker-compose up -d
-
   # Rebuild containers and start (use after dependency changes)
   docker-compose up --build
+  
+  # Start containers in background (detached mode)
+  docker-compose up -d
   ```
 
 - The FastAPI server will be running on `http://localhost:8000`
@@ -45,7 +45,7 @@ To update the database:
 
 1. [Poetry Installation Guide](https://python-poetry.org/docs/#installing-with-pipx)
 
-2. (Optional) Make sure that poetry creates a virtual environment in the backend directory
+2. (Optional) Make sure that poetry creates a virtual environment in the backend directory to easily find it
 
     ```bash
     poetry config virtualenvs.in-project true

@@ -24,17 +24,15 @@ from pgvector.sqlalchemy import Vector
 from novelinsights.models.base import CreationSourceType, TemporalSnapshotMixin, CoreBase
 from novelinsights.models.metadata.agent_metadata import AgentMetadata
 
-#
-#
-#
-# The following models are used to represent the knowledge graph.
-# They are used to represent the entities and relationships in the world.
-# It is all AI generated and is not manually created.
-# 
-#
-#
+"""
 
-class CoreNodeType(Enum):
+The following models are used to represent the knowledge graph.
+They are used to represent the entities and relationships in the world.
+It is all AI generated and is not manually created.
+
+"""
+
+class NodeType(Enum):
     # Entities and Groups
     CHARACTER = "character"          # Individual beings/personas
     ORGANIZATION = "organization"    # Groups of any kind
@@ -54,46 +52,6 @@ class CoreNodeType(Enum):
     
     OTHER = "other"                 # Other types not listed above
 
-
-class Node(CoreBase):
-    """
-    A node is a single entity in the knowledge graph.
-    It is the core of the knowledge graph and is used to represent entities in the world.
-    Parent of node states that actually contain the knowledge.
-    Usually created by an AI agent.
-    """
-    __tablename__ = 'node'
-    
-    # Override creation source for nodes to default to AI
-    creation_source = Column(SQLEnum(CreationSourceType), 
-                          nullable=False, 
-                          default=CreationSourceType.AI,
-                          index=True)
-    
-    # Core identity fields
-    name = Column(String(255), nullable=False, index=True)
-    core_type = Column(SQLEnum(CoreNodeType), nullable=False, index=True)
-    
-    # flexible type classification with more nuance
-    optional_type = Column(String(255), index=True)
-    additional_types = Column(ARRAY(String)) # Additional types or categories the AI has identified
-    
-    # Searchable fields
-    ts_vector = Column(TSVECTOR) # name, optional_type, additional_types
-    
-    # Relationships
-    # It's states over time
-    states = relationship('NodeState', back_populates='node')
-    
-    # Relationships
-    relationships = relationship(
-        "NodeRelationship",
-        primaryjoin="or_(Node.id==NodeRelationship.source_node_id, Node.id==NodeRelationship.target_node_id)",
-    )
-    
-    __table_args__ = (
-        Index('ix_node_ts_vector', 'ts_vector', postgresql_using='gin'),
-    )
 
 class NodeState(TemporalSnapshotMixin, CoreBase):
     """
@@ -174,3 +132,45 @@ class NodeState(TemporalSnapshotMixin, CoreBase):
     # one node to one agent metadata
     agent_metadata_id = Column(UUID(as_uuid=True), ForeignKey('agent_metadata.id'), nullable=False)
     agent_metadata = relationship(AgentMetadata)
+
+
+
+class Node(CoreBase):
+    """
+    A node is a single entity in the knowledge graph.
+    It is the core of the knowledge graph and is used to represent entities in the world.
+    Parent of node states that actually contain the knowledge.
+    Usually created by an AI agent.
+    """
+    __tablename__ = 'node'
+    
+    # Override creation source for nodes to default to AI
+    creation_source = Column(SQLEnum(CreationSourceType), 
+                          nullable=False, 
+                          default=CreationSourceType.AI,
+                          index=True)
+    
+    # Core identity fields
+    name = Column(String(255), nullable=False, index=True)
+    node_type = Column(SQLEnum(NodeType), nullable=False, index=True)
+    
+    # flexible type classification with more nuance
+    optional_type = Column(String(255), index=True)
+    additional_types = Column(ARRAY(String)) # Additional types or categories the AI has identified
+    
+    # Searchable fields
+    ts_vector = Column(TSVECTOR) # name, optional_type, additional_types
+    
+    # Relationships
+    # It's states over time
+    states = relationship('NodeState', back_populates='node')
+    
+    # Relationships
+    relationships = relationship(
+        "NodeRelationship",
+        primaryjoin="or_(Node.id==NodeRelationship.source_node_id, Node.id==NodeRelationship.target_node_id)",
+    )
+    
+    __table_args__ = (
+        Index('ix_node_ts_vector', 'ts_vector', postgresql_using='gin'),
+    )

@@ -1,4 +1,4 @@
--- init-scripts/01_extensions.sql
+-- novelinsights/backend/db/init/01_extensions.sql
 
 -- Enable required PostgreSQL extensions
 CREATE EXTENSION IF NOT EXISTS vector;      -- Enables vector similarity search capabilities
