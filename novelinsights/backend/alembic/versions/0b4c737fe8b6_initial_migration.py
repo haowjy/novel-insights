@@ -1,8 +1,8 @@
 """initial_migration
 
-Revision ID: 43a3ae8d7aa2
+Revision ID: 0b4c737fe8b6
 Revises: 
-Create Date: 2025-02-06 03:37:00.302902
+Create Date: 2025-02-08 12:10:20.440602
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import pgvector
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '43a3ae8d7aa2'
+revision: str = '0b4c737fe8b6'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,6 +31,37 @@ def upgrade() -> None:
     sa.Enum('CHARACTER', 'ORGANIZATION', 'LOCATION', 'ITEM', 'CONCEPT', 'CULTURE', 'EVENT', 'TIME_PERIOD', 'ARC', 'THEME', 'OTHER', name='corenodetype').create(op.get_bind())
     sa.Enum('HUMAN', 'AI', name='creationsourcetype').create(op.get_bind())
     sa.Enum('TEMPLATE', name='agenttype').create(op.get_bind())
+    op.create_table('agent_metadata',
+    sa.Column('agent_type', postgresql.ENUM('TEMPLATE', name='agenttype', create_type=False), nullable=False),
+    sa.Column('agent_version', sa.String(length=50), nullable=False),
+    sa.Column('tokens_used', sa.Integer(), nullable=True),
+    sa.Column('success', sa.Boolean(), nullable=False),
+    sa.Column('error', sa.Text(), nullable=True),
+    sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
+    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_agent_metadata_created_at'), 'agent_metadata', ['created_at'], unique=False)
+    op.create_index(op.f('ix_agent_metadata_creation_source'), 'agent_metadata', ['creation_source'], unique=False)
+    op.create_index(op.f('ix_agent_metadata_updated_at'), 'agent_metadata', ['updated_at'], unique=False)
+    op.create_table('article',
+    sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('type', postgresql.ENUM('CHARACTER', 'ORGANIZATION', 'LOCATION', 'ITEM', 'CONCEPT', 'CULTURE', 'EVENT', 'TIME_PERIOD', 'ARC', 'THEME', 'OTHER', name='corenodetype', create_type=False), nullable=False),
+    sa.Column('latest_snapshot_id', sa.UUID(), nullable=True),
+    sa.Column('slug', sa.String(length=255), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
+    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
+    sa.ForeignKeyConstraint(['latest_snapshot_id'], ['article_snapshot.id'], name='fk_article_latest_snapshot', use_alter=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_article_created_at'), 'article', ['created_at'], unique=False)
+    op.create_index(op.f('ix_article_creation_source'), 'article', ['creation_source'], unique=False)
+    op.create_index(op.f('ix_article_updated_at'), 'article', ['updated_at'], unique=False)
     op.create_table('content_structure',
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('type', postgresql.ENUM('BOOK', 'VOLUME', 'ARC', 'CHAPTER', 'SCENE', 'PASSAGE', 'WIKI_ENTRY', 'WORLDBUILDING', 'CHARACTER_SHEET', 'PLOT_OUTLINE', 'PROJECT', 'COLLECTION', 'TIMELINE', 'OTHER', name='contentstructuretype', create_type=False), nullable=False),
@@ -122,23 +153,29 @@ def upgrade() -> None:
     op.create_index(op.f('ix_users_created_at'), 'users', ['created_at'], unique=False)
     op.create_index(op.f('ix_users_creation_source'), 'users', ['creation_source'], unique=False)
     op.create_index(op.f('ix_users_updated_at'), 'users', ['updated_at'], unique=False)
-    op.create_table('article',
-    sa.Column('node_id', sa.UUID(), nullable=False),
-    sa.Column('title', sa.String(length=255), nullable=False),
-    sa.Column('type', postgresql.ENUM('CHARACTER', 'ORGANIZATION', 'LOCATION', 'ITEM', 'CONCEPT', 'CULTURE', 'EVENT', 'TIME_PERIOD', 'ARC', 'THEME', 'OTHER', name='corenodetype', create_type=False), nullable=False),
-    sa.Column('current_snapshot_id', sa.UUID(), nullable=True),
+    op.create_table('article_snapshot',
+    sa.Column('article_id', sa.UUID(), nullable=False),
+    sa.Column('created_by_id', sa.UUID(), nullable=True),
+    sa.Column('updated_by_id', sa.UUID(), nullable=True),
+    sa.Column('generated_at', sa.DateTime(), nullable=True),
+    sa.Column('parent_structure_id', sa.UUID(), nullable=False),
+    sa.Column('current_structure_id', sa.UUID(), nullable=False),
     sa.Column('slug', sa.String(length=255), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
     sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
-    sa.ForeignKeyConstraint(['current_snapshot_id'], ['article_snapshot.id'], name='fk_article_current_snapshot', use_alter=True),
-    sa.ForeignKeyConstraint(['node_id'], ['node.id'], ),
+    sa.ForeignKeyConstraint(['article_id'], ['article.id'], ),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['current_structure_id'], ['content_structure.id'], ),
+    sa.ForeignKeyConstraint(['parent_structure_id'], ['content_structure.id'], ),
+    sa.ForeignKeyConstraint(['updated_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_article_created_at'), 'article', ['created_at'], unique=False)
-    op.create_index(op.f('ix_article_creation_source'), 'article', ['creation_source'], unique=False)
-    op.create_index(op.f('ix_article_updated_at'), 'article', ['updated_at'], unique=False)
+    op.create_index(op.f('ix_article_snapshot_created_at'), 'article_snapshot', ['created_at'], unique=False)
+    op.create_index(op.f('ix_article_snapshot_creation_source'), 'article_snapshot', ['creation_source'], unique=False)
+    op.create_index(op.f('ix_article_snapshot_updated_at'), 'article_snapshot', ['updated_at'], unique=False)
+    op.create_index('ix_user_article_snapshot_unique', 'article_snapshot', ['article_id', 'created_by_id'], unique=True, postgresql_where=sa.text('created_by_id IS NOT NULL'))
     op.create_table('content_unit',
     sa.Column('content', sa.Text(), nullable=True),
     sa.Column('context_id', sa.UUID(), nullable=True),
@@ -171,14 +208,6 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
     sa.PrimaryKeyConstraint('context_id', 'content_structure_id')
     )
-    op.create_table('context_node',
-    sa.Column('context_id', sa.UUID(), nullable=False),
-    sa.Column('node_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
-    sa.ForeignKeyConstraint(['node_id'], ['node.id'], ),
-    sa.PrimaryKeyConstraint('context_id', 'node_id')
-    )
     op.create_table('node_relationship',
     sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
     sa.Column('current_status', postgresql.ENUM('ACTIVE', 'DORMANT', 'BROKEN', 'DECEASED', 'HISTORICAL', 'UNKNOWN', name='relationshipstatus', create_type=False), nullable=False),
@@ -202,91 +231,21 @@ def upgrade() -> None:
     op.create_index(op.f('ix_node_relationship_relationship_type'), 'node_relationship', ['relationship_type'], unique=False)
     op.create_index(op.f('ix_node_relationship_subtype'), 'node_relationship', ['subtype'], unique=False)
     op.create_index(op.f('ix_node_relationship_updated_at'), 'node_relationship', ['updated_at'], unique=False)
-    op.create_table('article_snapshot',
-    sa.Column('article_id', sa.UUID(), nullable=False),
-    sa.Column('created_by_id', sa.UUID(), nullable=True),
-    sa.Column('updated_by_id', sa.UUID(), nullable=True),
-    sa.Column('article_structure_id', sa.UUID(), nullable=False),
-    sa.Column('generated_at', sa.DateTime(), nullable=True),
-    sa.Column('parent_structure_id', sa.UUID(), nullable=False),
-    sa.Column('current_structure_id', sa.UUID(), nullable=False),
-    sa.Column('slug', sa.String(length=255), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
-    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
-    sa.ForeignKeyConstraint(['article_id'], ['article.id'], ),
-    sa.ForeignKeyConstraint(['article_structure_id'], ['content_structure.id'], ),
-    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
-    sa.ForeignKeyConstraint(['current_structure_id'], ['content_structure.id'], ),
-    sa.ForeignKeyConstraint(['parent_structure_id'], ['content_structure.id'], ),
-    sa.ForeignKeyConstraint(['updated_by_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_article_snapshot_created_at'), 'article_snapshot', ['created_at'], unique=False)
-    op.create_index(op.f('ix_article_snapshot_creation_source'), 'article_snapshot', ['creation_source'], unique=False)
-    op.create_index(op.f('ix_article_snapshot_updated_at'), 'article_snapshot', ['updated_at'], unique=False)
-    op.create_index('ix_user_article_snapshot_unique', 'article_snapshot', ['article_id', 'created_by_id'], unique=True, postgresql_where=sa.text('created_by_id IS NOT NULL'))
-    op.create_table('contentunit_contentstructure',
-    sa.Column('content_structure_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['content_structure_id'], ['content_structure.id'], ),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
-    sa.PrimaryKeyConstraint('content_structure_id', 'content_unit_id')
-    )
-    op.create_table('contentunit_node',
-    sa.Column('node_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
-    sa.ForeignKeyConstraint(['node_id'], ['node.id'], ),
-    sa.PrimaryKeyConstraint('node_id', 'content_unit_id')
-    )
-    op.create_table('context_contentunit',
-    sa.Column('context_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
-    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
-    sa.PrimaryKeyConstraint('context_id', 'content_unit_id')
-    )
-    op.create_table('node_relationship_state',
-    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
-    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
-    sa.Column('strength', sa.Integer(), nullable=True, comment='1-5, 5 being the strongest connection'),
-    sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('properties', postgresql.JSONB(astext_type=sa.Text()), nullable=True, comment='\n        {\n            "status": str,      # e.g., "active", "strained", "broken"\n            "dynamics": str,    # e.g., "supportive", "antagonistic"\n            "evidence": list    # References to supporting content\n        }\n        '),
-    sa.Column('status', postgresql.ENUM('ACTIVE', 'DORMANT', 'BROKEN', 'DECEASED', 'HISTORICAL', 'UNKNOWN', name='relationshipstatus', create_type=False), nullable=False),
-    sa.Column('transition', postgresql.JSONB(astext_type=sa.Text()), nullable=True, comment='\n        {\n            "type": str,          # e.g., "breakup", "death", "separation"\n            "cause": str,         # Reason for status change\n            "permanence": str,    # "temporary", "permanent", "unknown"\n            "initiator_id": uuid  # Which node initiated the change (if applicable)\n        }\n        '),
-    sa.Column('parent_structure_id', sa.UUID(), nullable=False),
-    sa.Column('current_structure_id', sa.UUID(), nullable=False),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
-    sa.ForeignKeyConstraint(['current_structure_id'], ['content_structure.id'], ),
-    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
-    sa.ForeignKeyConstraint(['parent_structure_id'], ['content_structure.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_node_relationship_state_created_at'), 'node_relationship_state', ['created_at'], unique=False)
-    op.create_index(op.f('ix_node_relationship_state_creation_source'), 'node_relationship_state', ['creation_source'], unique=False)
-    op.create_index(op.f('ix_node_relationship_state_updated_at'), 'node_relationship_state', ['updated_at'], unique=False)
     op.create_table('node_state',
     sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
     sa.Column('node_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
     sa.Column('importance', sa.Integer(), nullable=True, comment='1-5, 1 being the most important'),
     sa.Column('summary', sa.Text(), nullable=True),
     sa.Column('knowledge', postgresql.JSONB(astext_type=sa.Text()), nullable=True, comment='\n        {\n            "explicit": {}, # Directly stated in text\n            "implicit": {}, # AI-inferred knowledge\n            "situational": {}, # Temporary/contextual information\n            "foundational": {} # Core/persistent information\n        }\n        '),
     sa.Column('ts_vector', postgresql.TSVECTOR(), nullable=True),
     sa.Column('state_embedding', pgvector.sqlalchemy.vector.VECTOR(dim=1536), nullable=True),
+    sa.Column('agent_metadata_id', sa.UUID(), nullable=False),
     sa.Column('parent_structure_id', sa.UUID(), nullable=False),
     sa.Column('current_structure_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.ForeignKeyConstraint(['agent_metadata_id'], ['agent_metadata.id'], ),
     sa.ForeignKeyConstraint(['current_structure_id'], ['content_structure.id'], ),
     sa.ForeignKeyConstraint(['node_id'], ['node.id'], ),
     sa.ForeignKeyConstraint(['parent_structure_id'], ['content_structure.id'], ),
@@ -297,50 +256,6 @@ def upgrade() -> None:
     op.create_index('ix_node_state_ts_vector', 'node_state', ['ts_vector'], unique=False, postgresql_using='gin')
     op.create_index(op.f('ix_node_state_updated_at'), 'node_state', ['updated_at'], unique=False)
     op.create_index('node_state_embedding_idx', 'node_state', ['state_embedding'], unique=False, postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'state_embedding': 'vector_cosine_ops'})
-    op.create_table('noderelationship_contentunit',
-    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
-    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
-    sa.PrimaryKeyConstraint('node_relationship_id', 'content_unit_id')
-    )
-    op.create_table('noderelationship_context',
-    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
-    sa.Column('context_id', sa.UUID(), nullable=False),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
-    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
-    sa.PrimaryKeyConstraint('node_relationship_id', 'context_id')
-    )
-    op.create_table('agent_metadata',
-    sa.Column('node_state_id', sa.UUID(), nullable=False),
-    sa.Column('agent_type', postgresql.ENUM('TEMPLATE', name='agenttype', create_type=False), nullable=False),
-    sa.Column('agent_version', sa.String(length=50), nullable=False),
-    sa.Column('tokens_used', sa.Integer(), nullable=True),
-    sa.Column('success', sa.Boolean(), nullable=False),
-    sa.Column('error', sa.Text(), nullable=True),
-    sa.Column('metadata', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.UUID(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
-    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
-    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
-    sa.ForeignKeyConstraint(['node_state_id'], ['node_state.id'], ),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_agent_metadata_created_at'), 'agent_metadata', ['created_at'], unique=False)
-    op.create_index(op.f('ix_agent_metadata_creation_source'), 'agent_metadata', ['creation_source'], unique=False)
-    op.create_index(op.f('ix_agent_metadata_updated_at'), 'agent_metadata', ['updated_at'], unique=False)
-    op.create_table('article_content_unit',
-    sa.Column('article_snapshot_id', sa.UUID(), nullable=False),
-    sa.Column('content_unit_id', sa.UUID(), nullable=False),
-    sa.Column('sequence', sa.Integer(), nullable=True),
-    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
-    sa.ForeignKeyConstraint(['article_snapshot_id'], ['article_snapshot.id'], ),
-    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
-    sa.PrimaryKeyConstraint('article_snapshot_id', 'content_unit_id'),
-    sa.UniqueConstraint('article_snapshot_id', 'sequence', name='uq_article_content_sequence')
-    )
     op.create_table('prompt_metadata',
     sa.Column('agent_metadata_id', sa.UUID(), nullable=False),
     sa.Column('model', sa.String(length=255), nullable=False),
@@ -358,40 +273,121 @@ def upgrade() -> None:
     op.create_index(op.f('ix_prompt_metadata_created_at'), 'prompt_metadata', ['created_at'], unique=False)
     op.create_index(op.f('ix_prompt_metadata_creation_source'), 'prompt_metadata', ['creation_source'], unique=False)
     op.create_index(op.f('ix_prompt_metadata_updated_at'), 'prompt_metadata', ['updated_at'], unique=False)
+    op.create_table('article_content_unit',
+    sa.Column('article_snapshot_id', sa.UUID(), nullable=False),
+    sa.Column('content_unit_id', sa.UUID(), nullable=False),
+    sa.Column('sequence', sa.Integer(), nullable=True),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['article_snapshot_id'], ['article_snapshot.id'], ),
+    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.PrimaryKeyConstraint('article_snapshot_id', 'content_unit_id'),
+    sa.UniqueConstraint('article_snapshot_id', 'sequence', name='uq_article_content_sequence')
+    )
+    op.create_table('articlesnapshot_nodestate',
+    sa.Column('article_snapshot_id', sa.UUID(), nullable=False),
+    sa.Column('node_state_id', sa.UUID(), nullable=False),
+    sa.Column('is_primary', sa.Boolean(), nullable=True),
+    sa.ForeignKeyConstraint(['article_snapshot_id'], ['article_snapshot.id'], ),
+    sa.ForeignKeyConstraint(['node_state_id'], ['node_state.id'], ),
+    sa.PrimaryKeyConstraint('article_snapshot_id', 'node_state_id')
+    )
+    op.create_table('contentunit_contentstructure',
+    sa.Column('content_structure_id', sa.UUID(), nullable=False),
+    sa.Column('content_unit_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['content_structure_id'], ['content_structure.id'], ),
+    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.PrimaryKeyConstraint('content_structure_id', 'content_unit_id')
+    )
+    op.create_table('contentunit_nodestate',
+    sa.Column('node_state_id', sa.UUID(), nullable=False),
+    sa.Column('content_unit_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.ForeignKeyConstraint(['node_state_id'], ['node_state.id'], ),
+    sa.PrimaryKeyConstraint('node_state_id', 'content_unit_id')
+    )
+    op.create_table('context_contentunit',
+    sa.Column('context_id', sa.UUID(), nullable=False),
+    sa.Column('content_unit_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
+    sa.PrimaryKeyConstraint('context_id', 'content_unit_id')
+    )
+    op.create_table('context_node_state',
+    sa.Column('context_id', sa.UUID(), nullable=False),
+    sa.Column('node_state_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
+    sa.ForeignKeyConstraint(['node_state_id'], ['node_state.id'], ),
+    sa.PrimaryKeyConstraint('context_id', 'node_state_id')
+    )
+    op.create_table('node_relationship_state',
+    sa.Column('creation_source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=False),
+    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
+    sa.Column('status', postgresql.ENUM('ACTIVE', 'DORMANT', 'BROKEN', 'DECEASED', 'HISTORICAL', 'UNKNOWN', name='relationshipstatus', create_type=False), nullable=False),
+    sa.Column('strength', sa.Integer(), nullable=True, comment='1-5, 5 being the strongest connection'),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('properties', postgresql.JSONB(astext_type=sa.Text()), nullable=True, comment='\n        {\n            "status": str,      # e.g., "active", "strained", "broken"\n            "dynamics": str,    # e.g., "supportive", "antagonistic"\n            "evidence": list    # References to supporting content\n        }\n        '),
+    sa.Column('agent_metadata_id', sa.UUID(), nullable=False),
+    sa.Column('parent_structure_id', sa.UUID(), nullable=False),
+    sa.Column('current_structure_id', sa.UUID(), nullable=False),
+    sa.Column('id', sa.UUID(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was first created'),
+    sa.Column('updated_at', sa.DateTime(timezone=True), nullable=False, comment='When this record was last modified'),
+    sa.ForeignKeyConstraint(['agent_metadata_id'], ['agent_metadata.id'], ),
+    sa.ForeignKeyConstraint(['current_structure_id'], ['content_structure.id'], ),
+    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
+    sa.ForeignKeyConstraint(['parent_structure_id'], ['content_structure.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_node_relationship_state_created_at'), 'node_relationship_state', ['created_at'], unique=False)
+    op.create_index(op.f('ix_node_relationship_state_creation_source'), 'node_relationship_state', ['creation_source'], unique=False)
+    op.create_index(op.f('ix_node_relationship_state_updated_at'), 'node_relationship_state', ['updated_at'], unique=False)
+    op.create_table('noderelationship_contentunit',
+    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
+    sa.Column('content_unit_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['content_unit_id'], ['content_unit.id'], ),
+    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
+    sa.PrimaryKeyConstraint('node_relationship_id', 'content_unit_id')
+    )
+    op.create_table('noderelationship_context',
+    sa.Column('node_relationship_id', sa.UUID(), nullable=False),
+    sa.Column('context_id', sa.UUID(), nullable=False),
+    sa.Column('source', postgresql.ENUM('HUMAN', 'AI', name='creationsourcetype', create_type=False), nullable=True),
+    sa.ForeignKeyConstraint(['context_id'], ['context.id'], ),
+    sa.ForeignKeyConstraint(['node_relationship_id'], ['node_relationship.id'], ),
+    sa.PrimaryKeyConstraint('node_relationship_id', 'context_id')
+    )
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table('noderelationship_context')
+    op.drop_table('noderelationship_contentunit')
+    op.drop_index(op.f('ix_node_relationship_state_updated_at'), table_name='node_relationship_state')
+    op.drop_index(op.f('ix_node_relationship_state_creation_source'), table_name='node_relationship_state')
+    op.drop_index(op.f('ix_node_relationship_state_created_at'), table_name='node_relationship_state')
+    op.drop_table('node_relationship_state')
+    op.drop_table('context_node_state')
+    op.drop_table('context_contentunit')
+    op.drop_table('contentunit_nodestate')
+    op.drop_table('contentunit_contentstructure')
+    op.drop_table('articlesnapshot_nodestate')
+    op.drop_table('article_content_unit')
     op.drop_index(op.f('ix_prompt_metadata_updated_at'), table_name='prompt_metadata')
     op.drop_index(op.f('ix_prompt_metadata_creation_source'), table_name='prompt_metadata')
     op.drop_index(op.f('ix_prompt_metadata_created_at'), table_name='prompt_metadata')
     op.drop_table('prompt_metadata')
-    op.drop_table('article_content_unit')
-    op.drop_index(op.f('ix_agent_metadata_updated_at'), table_name='agent_metadata')
-    op.drop_index(op.f('ix_agent_metadata_creation_source'), table_name='agent_metadata')
-    op.drop_index(op.f('ix_agent_metadata_created_at'), table_name='agent_metadata')
-    op.drop_table('agent_metadata')
-    op.drop_table('noderelationship_context')
-    op.drop_table('noderelationship_contentunit')
     op.drop_index('node_state_embedding_idx', table_name='node_state', postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'state_embedding': 'vector_cosine_ops'})
     op.drop_index(op.f('ix_node_state_updated_at'), table_name='node_state')
     op.drop_index('ix_node_state_ts_vector', table_name='node_state', postgresql_using='gin')
     op.drop_index(op.f('ix_node_state_creation_source'), table_name='node_state')
     op.drop_index(op.f('ix_node_state_created_at'), table_name='node_state')
     op.drop_table('node_state')
-    op.drop_index(op.f('ix_node_relationship_state_updated_at'), table_name='node_relationship_state')
-    op.drop_index(op.f('ix_node_relationship_state_creation_source'), table_name='node_relationship_state')
-    op.drop_index(op.f('ix_node_relationship_state_created_at'), table_name='node_relationship_state')
-    op.drop_table('node_relationship_state')
-    op.drop_table('context_contentunit')
-    op.drop_table('contentunit_node')
-    op.drop_table('contentunit_contentstructure')
-    op.drop_index('ix_user_article_snapshot_unique', table_name='article_snapshot', postgresql_where=sa.text('created_by_id IS NOT NULL'))
-    op.drop_index(op.f('ix_article_snapshot_updated_at'), table_name='article_snapshot')
-    op.drop_index(op.f('ix_article_snapshot_creation_source'), table_name='article_snapshot')
-    op.drop_index(op.f('ix_article_snapshot_created_at'), table_name='article_snapshot')
-    op.drop_table('article_snapshot')
     op.drop_index(op.f('ix_node_relationship_updated_at'), table_name='node_relationship')
     op.drop_index(op.f('ix_node_relationship_subtype'), table_name='node_relationship')
     op.drop_index(op.f('ix_node_relationship_relationship_type'), table_name='node_relationship')
@@ -400,7 +396,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_node_relationship_creation_source'), table_name='node_relationship')
     op.drop_index(op.f('ix_node_relationship_created_at'), table_name='node_relationship')
     op.drop_table('node_relationship')
-    op.drop_table('context_node')
     op.drop_table('context_content_structure')
     op.drop_index('ix_context_id', table_name='content_unit')
     op.drop_index(op.f('ix_content_unit_updated_at'), table_name='content_unit')
@@ -410,10 +405,11 @@ def downgrade() -> None:
     op.drop_index('ix_content_structure_id', table_name='content_unit')
     op.drop_index('content_unit_embedding_idx', table_name='content_unit', postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'content_embedding': 'vector_cosine_ops'})
     op.drop_table('content_unit')
-    op.drop_index(op.f('ix_article_updated_at'), table_name='article')
-    op.drop_index(op.f('ix_article_creation_source'), table_name='article')
-    op.drop_index(op.f('ix_article_created_at'), table_name='article')
-    op.drop_table('article')
+    op.drop_index('ix_user_article_snapshot_unique', table_name='article_snapshot', postgresql_where=sa.text('created_by_id IS NOT NULL'))
+    op.drop_index(op.f('ix_article_snapshot_updated_at'), table_name='article_snapshot')
+    op.drop_index(op.f('ix_article_snapshot_creation_source'), table_name='article_snapshot')
+    op.drop_index(op.f('ix_article_snapshot_created_at'), table_name='article_snapshot')
+    op.drop_table('article_snapshot')
     op.drop_index(op.f('ix_users_updated_at'), table_name='users')
     op.drop_index(op.f('ix_users_creation_source'), table_name='users')
     op.drop_index(op.f('ix_users_created_at'), table_name='users')
@@ -441,6 +437,14 @@ def downgrade() -> None:
     op.drop_index('idx_content_structure_canonical', table_name='content_structure')
     op.drop_index('content_structure_embedding_idx', table_name='content_structure', postgresql_using='hnsw', postgresql_with={'m': 16, 'ef_construction': 64}, postgresql_ops={'structure_embedding': 'vector_cosine_ops'})
     op.drop_table('content_structure')
+    op.drop_index(op.f('ix_article_updated_at'), table_name='article')
+    op.drop_index(op.f('ix_article_creation_source'), table_name='article')
+    op.drop_index(op.f('ix_article_created_at'), table_name='article')
+    op.drop_table('article')
+    op.drop_index(op.f('ix_agent_metadata_updated_at'), table_name='agent_metadata')
+    op.drop_index(op.f('ix_agent_metadata_creation_source'), table_name='agent_metadata')
+    op.drop_index(op.f('ix_agent_metadata_created_at'), table_name='agent_metadata')
+    op.drop_table('agent_metadata')
     sa.Enum('TEMPLATE', name='agenttype').drop(op.get_bind())
     sa.Enum('HUMAN', 'AI', name='creationsourcetype').drop(op.get_bind())
     sa.Enum('CHARACTER', 'ORGANIZATION', 'LOCATION', 'ITEM', 'CONCEPT', 'CULTURE', 'EVENT', 'TIME_PERIOD', 'ARC', 'THEME', 'OTHER', name='corenodetype').drop(op.get_bind())

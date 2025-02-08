@@ -54,6 +54,7 @@ class TemporalSnapshotMixin(object):
     Mixin that adds structure references to models.
     References a temporal structure (e.g. book, chapter, section, etc.) via the parent_structure_id.
     and points to a child structure (e.g. chapter, section, etc.) via the current_structure_id.
+    NOTE: you cannot access the fields from content_structure directly if you are using this mixin.
     """
     
     # Structure references (Many-to-One)

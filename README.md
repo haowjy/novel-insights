@@ -38,7 +38,7 @@ To just run the database:
 To update the database:
 
   ```bash
-  ./migrate.sh "migration message"
+  ./db_migrate.sh "migration message"
   ```
 
 #### Running fastapi without docker (local development)

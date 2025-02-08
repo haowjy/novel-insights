@@ -1,12 +1,15 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# novelinsights/backend/novelinsights/main.py
+
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-load_dotenv()
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from novelinsights.api.routes import router as api_router
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = FastAPI(title="Novel Insights")
 

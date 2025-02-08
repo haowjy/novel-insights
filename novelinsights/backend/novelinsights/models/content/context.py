@@ -28,11 +28,11 @@ context_contentunit = Table(
     Column("source", SQLEnum(CreationSourceType))
 )
 
-context_node = Table(
-       "context_node",
+context_node_state = Table(
+       "context_node_state",
        Base.metadata,
        Column("context_id", UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
-       Column("node_id", UUID(as_uuid=True), ForeignKey("node.id"), primary_key=True),
+       Column("node_state_id", UUID(as_uuid=True), ForeignKey("node_state.id"), primary_key=True),
        Column("source", SQLEnum(CreationSourceType))
 )
 
@@ -65,23 +65,18 @@ class Context(SlugMixin, CoreBase):
     # Relationships
     structures = relationship(
         'ContentStructure', 
-        backref="contexts", 
+        back_populates='contexts', 
         secondary='context_content_structure',
     )
     content_units = relationship(
         'ContentUnit', 
-        backref="contexts", 
+        back_populates='contexts', 
         secondary='context_contentunit',
     )
-    nodes = relationship(
-        'Node',
-        backref='contexts', 
-        secondary='context_node',
-    )
-    relationships = relationship(
-        'NodeRelationship',
-        back_populates="contexts",
-        secondary='noderelationship_context',
+    node_states = relationship(
+        'NodeState',
+        back_populates='contexts', 
+        secondary='context_node_state',
     )
     
     __table_args__ = (

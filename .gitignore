@@ -166,3 +166,6 @@ prototype/data/*
 prototype/output/*
 
 .DS_Store
+
+**/debug/*
+!**/debug/test.ipynb

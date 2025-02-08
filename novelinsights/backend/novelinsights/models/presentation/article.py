@@ -1,6 +1,7 @@
 # novelinsights/models/presentation.py
 
 from sqlalchemy import (
+    Boolean,
     Column, 
     ForeignKey, 
     String, 
@@ -33,25 +34,35 @@ articlesnapshot_contentunit = Table(
                     name='uq_article_content_sequence')
 )
 
+# Association table for articles to nodes
+articlesnapshot_nodestate = Table(
+    'articlesnapshot_nodestate',
+    Base.metadata,
+    Column('article_snapshot_id', UUID(as_uuid=True), ForeignKey('article_snapshot.id'), primary_key=True),
+    Column('node_state_id', UUID(as_uuid=True), ForeignKey('node_state.id'), primary_key=True),
+    Column('is_primary', Boolean, default=False),  # Optional: to mark the main subject if needed
+)
+
 class Article(SlugMixin, CoreBase):
     __tablename__ = 'article'
     
     # Core identity fields
-    node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
     title = Column(String(255), nullable=False)
     type = Column(SQLEnum(CoreNodeType), nullable=False)
     
     # Defer the foreign key constraint creation
-    current_snapshot_id = Column(UUID(as_uuid=True), 
+    latest_snapshot_id = Column(UUID(as_uuid=True), 
                                ForeignKey('article_snapshot.id', 
                                         use_alter=True,
-                                        name='fk_article_current_snapshot'),
+                                        name='fk_article_latest_snapshot'),
                                nullable=True)
     
-    # Only need this one relationship
-    snapshots = relationship("ArticleSnapshot", back_populates="article")
-    node = relationship('Node', backref='articles')
-    
+    # Update the relationship to be more explicit
+    snapshots = relationship(
+        "ArticleSnapshot",
+        back_populates="article",
+        foreign_keys="[ArticleSnapshot.article_id]"  # Specify which foreign key to use
+    )
 
 class ArticleSnapshot(TemporalSnapshotMixin, SlugMixin, CoreBase):
     """
@@ -65,7 +76,9 @@ class ArticleSnapshot(TemporalSnapshotMixin, SlugMixin, CoreBase):
     """
     __tablename__ = 'article_snapshot'
     
+    # Simple back-reference to article
     article_id = Column(UUID(as_uuid=True), ForeignKey('article.id'), nullable=False)
+    article = relationship(Article, back_populates="snapshots", foreign_keys=[article_id])
     
     # User tracking
     created_by_id = Column(UUID(as_uuid=True), 
@@ -79,24 +92,27 @@ class ArticleSnapshot(TemporalSnapshotMixin, SlugMixin, CoreBase):
     creator = relationship(
         "User",
         foreign_keys=[created_by_id],
-        back_populates="created_snapshots"
+        back_populates="created_articlesnapshots",
     )
     last_editor = relationship(
         "User",
         foreign_keys=[updated_by_id],
-        back_populates="updated_snapshots"
+        back_populates="updated_articlesnapshots",
     )
     
-    article_structure_id = Column(UUID(as_uuid=True), 
-                                  ForeignKey('content_structure.id'), 
-                                  nullable=False)
-    # Article Content Structure
-    # This is the structure of the article as it is currently presented
-    # separate from the official content structure of the book or publication
-    # This is just how an article is "written" if it were written by the author
-    # one article structure to one article
-    articlesnapshot_structure = relationship('ContentStructure', 
-                                   foreign_keys=[article_structure_id])
+    # # Article Content Structure
+    # # This is the structure of the article as it is currently presented
+    # # separate from the official content structure of the book or publication
+    # # This is just how an article is "written" if it were written by the author
+    # # one article structure to one article
+    # # TODO: should this just be a relationship to the individual content units?
+    # article_structure_id = Column(UUID(as_uuid=True), 
+    #                             ForeignKey('content_structure.id'), 
+    #                             nullable=False)
+    # articlesnapshot_structure = relationship('ContentStructure', 
+    #                                foreign_keys=[article_structure_id],
+    #                                back_populates='articlesnapshots')
+    # NOTE: this IS the content structure of an article
     
     # Content units
     content_units = relationship(
@@ -105,11 +121,15 @@ class ArticleSnapshot(TemporalSnapshotMixin, SlugMixin, CoreBase):
         order_by='article_content_unit.c.sequence'
     )
     
+    # Nodes
+    node_states = relationship(
+        'NodeState',
+        secondary=articlesnapshot_nodestate,
+        order_by='articlesnapshot_nodestate.c.is_primary'
+    )
+    
     # Metadata
     generated_at = Column(DateTime)
-    
-    # Simple back-reference to article
-    article = relationship(Article, back_populates="snapshots")
 
     __table_args__ = (
         # Unique index for user-article combination

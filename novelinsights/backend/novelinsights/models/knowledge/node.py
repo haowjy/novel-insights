@@ -81,16 +81,14 @@ class Node(CoreBase):
     # Searchable fields
     ts_vector = Column(TSVECTOR) # name, optional_type, additional_types
     
-    # Relationship to context (human-created annotations, notes, etc.)
-    contexts = relationship(
-        'Context',
-        back_populates="nodes",
-        secondary="context_node"
-    )
-    content_units = relationship(
-        'ContentUnit', 
-        backref="nodes", 
-        secondary="contentunit_node"
+    # Relationships
+    # It's states over time
+    states = relationship('NodeState', back_populates='node')
+    
+    # Relationships
+    relationships = relationship(
+        "NodeRelationship",
+        primaryjoin="or_(Node.id==NodeRelationship.source_node_id, Node.id==NodeRelationship.target_node_id)",
     )
     
     __table_args__ = (
@@ -112,9 +110,28 @@ class NodeState(TemporalSnapshotMixin, CoreBase):
     
     # reference to the node that this state belongs to
     node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
+    node = relationship('Node', back_populates='states')
     
     # reference to the content units that this node state references from
-    content_unit_id = Column(UUID(as_uuid=True), ForeignKey('content_unit.id'), nullable=False)
+    content_units = relationship(
+        'ContentUnit', 
+        back_populates='node_states',
+        secondary='contentunit_nodestate'
+    )
+    
+    # reference to the article snapshots that this node state references from
+    article_snapshots = relationship(
+        'ArticleSnapshot', 
+        back_populates='node_states',
+        secondary='articlesnapshot_nodestate'
+    )
+    
+    # reference to the contexts that this node state references from
+    contexts = relationship(
+        'Context',
+        back_populates='node_states',
+        secondary='context_node_state'
+    )
     
     # AI-generated fields
     importance = Column(Integer, comment="1-5, 1 being the most important")
@@ -155,4 +172,5 @@ class NodeState(TemporalSnapshotMixin, CoreBase):
     
     # Agent history metadata if this node was created by an ai agent (nodes are always created by an agent)
     # one node to one agent metadata
-    agent_metadata = relationship(AgentMetadata, backref="node_state")
+    agent_metadata_id = Column(UUID(as_uuid=True), ForeignKey('agent_metadata.id'), nullable=False)
+    agent_metadata = relationship(AgentMetadata)

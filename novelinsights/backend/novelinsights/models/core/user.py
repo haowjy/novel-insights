@@ -27,15 +27,15 @@ class User(CoreBase):
     preferences = Column(JSONB)
     
     # Article relationships
-    created_snapshots = relationship(
+    created_articlesnapshots = relationship(
         ArticleSnapshot,
         foreign_keys=ArticleSnapshot.created_by_id,
-        back_populates="creator"
-    )
-    updated_snapshots = relationship(
+        back_populates="creator",
+    )   
+    updated_articlesnapshots = relationship(
         ArticleSnapshot,
         foreign_keys=[ArticleSnapshot.updated_by_id],
-        back_populates="last_editor"
+        back_populates="last_editor",
     )
 
     def __repr__(self):

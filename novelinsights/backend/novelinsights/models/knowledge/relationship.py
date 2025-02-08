@@ -27,18 +27,18 @@ from novelinsights.models.base import Base, CreationSourceType, TemporalSnapshot
 noderelationship_context = Table(
     "noderelationship_context",
     Base.metadata,
-    Column("node_relationship_id", UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
-    Column("context_id", UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
-    Column("source", SQLEnum(CreationSourceType))
+    Column('node_relationship_id', UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
+    Column('context_id', UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
+    Column('source', SQLEnum(CreationSourceType))
 )
 
 # NEW: Define the association table for Relationship <--> ContentUnit
 noderelationship_contentunit = Table(   
     "noderelationship_contentunit",
     Base.metadata,
-    Column("node_relationship_id", UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
-    Column("content_unit_id", UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
-    Column("source", SQLEnum(CreationSourceType))
+    Column('node_relationship_id', UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
+    Column('content_unit_id', UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
+    Column('source', SQLEnum(CreationSourceType))
 )
 
 class RelationshipDirection(Enum):
@@ -97,29 +97,28 @@ class NodeRelationship(CoreBase):
     
     # Core relationship fields
     source_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
+    source_node = relationship(
+        "Node",
+        foreign_keys=[source_node_id])
+    
     target_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
+    target_node = relationship(
+        "Node",
+        foreign_keys=[target_node_id])
+    
     direction = Column(SQLEnum(RelationshipDirection), nullable=False, index=True)
     
     # Type classification
     relationship_type = Column(SQLEnum(RelationType), nullable=False, index=True)
     subtype = Column(String(255), index=True)  # Optional more specific type
     additional_types = Column(ARRAY(String))   # Additional type classifications
+
+    # Relationship States
+    states = relationship(
+        'NodeRelationshipState', 
+        back_populates='node_relationship'
+        )
     
-    # Relationships
-    source_node = relationship("Node", foreign_keys=[source_node_id])
-    target_node = relationship("Node", foreign_keys=[target_node_id])
-    
-    # Contexts
-    contexts = relationship(
-        'Context',
-        back_populates="relationships",
-        secondary='noderelationship_context'
-    )
-    content_units = relationship(
-        'ContentUnit', 
-        backref="relationships", 
-        secondary='noderelationship_contentunit'
-    )
     
 
 class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
@@ -136,13 +135,19 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
                          index=True)
     
     node_relationship_id = Column(UUID(as_uuid=True), ForeignKey('node_relationship.id'), nullable=False)
-        
+    node_relationship = relationship('NodeRelationship', back_populates='states')
+
+    # Status at this point in content
+    status = Column(SQLEnum(RelationshipStatus), 
+                   nullable=False, 
+                   default=RelationshipStatus.ACTIVE)
+    
     # AI-generated fields
     strength = Column(Integer, comment="1-5, 5 being the strongest connection")
     description = Column(Text)  # Brief description of the relationship state
     
      # If we need structured data about the relationship, keep it focused on the connection
-    properties = Column(JSONB, 
+    properties = Column(JSONB,
         comment="""
         {
             "status": str,      # e.g., "active", "strained", "broken"
@@ -153,24 +158,5 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
     )
     
     # Agent metadata if this state was created by an AI agent
-    agent_metadata = relationship('AgentMetadata', backref="relationship_state")
-
-    # Status at this point in content
-    status = Column(SQLEnum(RelationshipStatus), 
-                   nullable=False, 
-                   default=RelationshipStatus.ACTIVE)
-    
-    # Structured data about the state change
-    transition = Column(JSONB,
-        comment="""
-        {
-            "type": str,          # e.g., "breakup", "death", "separation"
-            "cause": str,         # Reason for status change
-            "permanence": str,    # "temporary", "permanent", "unknown"
-            "initiator_id": uuid  # Which node initiated the change (if applicable)
-        }
-        """
-    )
-    
-
-
+    agent_metadata_id = Column(UUID(as_uuid=True), ForeignKey('agent_metadata.id'), nullable=False)
+    agent_metadata = relationship('AgentMetadata')

@@ -87,20 +87,20 @@ class ContentStructure(SlugMixin, CoreBase):
     parent = relationship(
         "ContentStructure", 
         remote_side=[id], 
-        backref="children"
+        back_populates='children'
     )
     
     # children are the children of the structure (optional)
     children = relationship(
         "ContentStructure",
-        backref="parent",
+        back_populates='parent',
         viewonly=True
     )
     
     # content units are the actual content of the structure (optional)
     content_units = relationship(
         'ContentUnit',
-        backref="structure",
+        back_populates='structure',
         secondary='contentunit_contentstructure',
         viewonly=True
     )
@@ -108,21 +108,9 @@ class ContentStructure(SlugMixin, CoreBase):
     # contexts are the contexts of the structure (optional)
     contexts = relationship(
         'Context',
-        backref="structures",
+        back_populates='structures',
         secondary='context_content_structure',
         viewonly=True
-    )
-    
-    # Article snapshot relationships (One-to-Many)
-    parent_article_snapshots = relationship(
-        'ArticleSnapshot',
-        backref="parent_structure",
-        foreign_keys='[ArticleSnapshot.parent_structure_id]'
-    )
-    current_article_snapshots = relationship(
-        'ArticleSnapshot',
-        backref="current_structure",
-        foreign_keys='[ArticleSnapshot.current_structure_id]'
     )
     
     __table_args__ = (

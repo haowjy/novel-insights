@@ -16,10 +16,10 @@ contentunit_contentstructure = Table(
     Column("source", SQLEnum(CreationSourceType))
 )
 
-contentunit_node = Table(
-       "contentunit_node",
+contentunit_nodestate = Table(
+       "contentunit_nodestate",
        Base.metadata,
-       Column("node_id", UUID(as_uuid=True), ForeignKey("node.id"), primary_key=True),
+       Column("node_state_id", UUID(as_uuid=True), ForeignKey("node_state.id"), primary_key=True),
        Column("content_unit_id", UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
        Column("source", SQLEnum(CreationSourceType))
 )
@@ -38,26 +38,28 @@ class ContentUnit(CoreBase):
     ts_vector = Column(TSVECTOR)
     content_embedding = Column(Vector(1536))  # Adjust dimension based on model
 
-    # Relationships
+    # Content Structure Relationships
     structure = relationship(
         'ContentStructure', 
-        backref='content_units',
+        back_populates='content_units',
         secondary='contentunit_contentstructure')
-    
+
     contexts = relationship(
         'Context', 
-        backref='content_units', 
+        back_populates='content_units', 
         secondary='context_contentunit')
     
-    nodes = relationship(
-        'Node',
-        backref='content_units',
-        secondary='contentunit_node'
+    # Node States Relationships
+    node_states = relationship(
+        'NodeState',
+        back_populates='content_units',
+        secondary='contentunit_nodestate'
     )
     
+    # Presentation Relationships
     article_snapshots = relationship(
-        "ArticleSnapshot",
-        back_populates="content_units",
+        'ArticleSnapshot',
+        back_populates='content_units',
         secondary='article_content_unit'
     )
     
