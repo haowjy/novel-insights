@@ -1,6 +1,6 @@
 from typing import Optional, Dict, Any
 
-from novelinsights.services.ai.agents.types import AgentType
+from novelinsights.types import AgentType
 from novelinsights.schemas.base import CoreBase, BaseConfig
 
 class AgentMetadataBase(CoreBase):

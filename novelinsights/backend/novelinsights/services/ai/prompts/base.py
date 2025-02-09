@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, TypedDict
+from typing import Any, Dict, Mapping
 from abc import ABC, abstractmethod
 from packaging.version import Version
 
@@ -12,8 +12,36 @@ class PromptRequest:
     estimated_tokens: int
     estimated_cost: float
 
-class PromptBase(ABC):
+@dataclass
+class PromptTemplateBase(ABC):
     """Base class for all prompt templates"""
+    
+    def update(self, **kwargs: Any) -> None:
+        """Update the template with given parameters"""
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+    
+    @abstractmethod
+    def template(self) -> 'PromptTemplateBase':
+        """Template for the prompt"""
+        raise NotImplementedError("Subclasses must implement this method")
+    
+    @abstractmethod
+    def prompt(self) -> str:
+        """Prompt for the template"""
+        raise NotImplementedError("Subclasses must implement this method")
+    
+    
+
+class DefaultPromptTemplate(PromptTemplateBase):
+    def template(self) -> 'PromptTemplateBase':
+        return self
+
+    def prompt(self) -> str:
+        return ""
+
+class PromptBase(ABC):
+    """Base class for all prompts"""
     
     #
     # Base Model and Parameters Definitions
@@ -22,10 +50,10 @@ class PromptBase(ABC):
     def __init__(
         self, 
         model_config: ModelConfig | None = None,
-        prompt_config: Dict[str, Any] | None = None,
+        prompt_template: PromptTemplateBase | None = None,
     ) -> None:
         self._model_config: ModelConfig = model_config or ModelConfig()
-        self._prompt_config: Dict[str, Any] = prompt_config or {}
+        self._prompt_template: PromptTemplateBase = prompt_template or DefaultPromptTemplate()
         self._last_rendered: str = ""
     
     @property
@@ -34,10 +62,9 @@ class PromptBase(ABC):
         return self._model_config
     
     @property
-    @abstractmethod
-    def prompt_config(self) -> Dict[str, Any]:
-        """Prompt configuration"""
-        raise NotImplementedError("Subclasses must implement this method")
+    def prompt_template(self) -> PromptTemplateBase:
+        """Prompt template"""
+        return self._prompt_template
     
     @property
     def last_rendered(self) -> str:
@@ -47,6 +74,10 @@ class PromptBase(ABC):
     #
     # Abstract methods
     #
+    @abstractmethod
+    def _prompt(self) -> str:
+        """Prompt template"""
+        raise NotImplementedError("Subclasses must implement this method")
     
     @abstractmethod
     def render(self, **kwargs: Any) -> PromptRequest:

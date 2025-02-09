@@ -20,5 +20,5 @@ class ModelConfig:
     frequency_penalty: float = field(default=0.0)
     presence_penalty: float = field(default=0.0)
     repetition_penalty: float = field(default=1.0)
-    stop_sequences: list[str] = field(default=[])
+    stop_sequences: list[str] = field(default_factory=list)
     

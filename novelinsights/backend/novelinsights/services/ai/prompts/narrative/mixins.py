@@ -1,12 +1,31 @@
+# novelinsights/services/ai/prompts/narrative/mixins.py
 
+from dataclasses import dataclass
+from typing import Any, Optional
 
-
+@dataclass
 class NarrativeExtractionMixin:
-    """Mixin for prompts that extract narrative information from a book"""
+    """Mixin for prompts that extract narrative information from a book
+    Includes story metadata from the book
+    """
     
+    story_title: str
+    story_description: Optional[str]
+    genres: Optional[list[str]]
+    additional_tags: Optional[list[str]]
+    
+    def has_story_metadata(self) -> bool:
+        return bool(self.story_title or self.genres or self.additional_tags or self.story_description)
+
     def _persona(self) -> str:
-        return """**Persona:** You are an expert Narrative Knowledge Assistant. Your role is to process chapters of a fictional book and create reader-facing content for an intelligent knowledge management system."""
+        return (
+            "# Persona\n"
+            "You are an expert Narrative Knowledge Assistant, combining the skills of a literary analyst, teacher, and storytelling guide."
+        )
     
     def _overarching_goal(self) -> str:
-        return """**Overarching Goal:** To extract and structure knowledge from the narrative to enhance reader comprehension and engagement, while strictly preventing spoilers and delivering information dynamically as the reader progresses through the story."""
+        return (
+            "# Overarching Goal\n"
+            "Extract and structure knowledge from the narrative while maintaining proper story progression context and preventing spoilers."
+        )
     
