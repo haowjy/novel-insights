@@ -5,8 +5,8 @@ from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 
-from novelinsights.models.base import Base, CoreBase, CreationSourceType
-
+from novelinsights.models.base import Base, CoreBase
+from novelinsights.types.core import CreationSourceType
 # Content Unit Association Tables
 contentunit_contentstructure = Table(
     "contentunit_contentstructure",

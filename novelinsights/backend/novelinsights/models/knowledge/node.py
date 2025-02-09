@@ -1,7 +1,5 @@
 # novelinsights/models/knowledge.py
 
-# Standard library imports
-from enum import Enum
 # SQLAlchemy core imports
 from sqlalchemy import (
     Column,
@@ -21,9 +19,10 @@ from sqlalchemy.dialects.postgresql import (
 from sqlalchemy.orm import relationship
 from pgvector.sqlalchemy import Vector
 
-from novelinsights.models.base import CreationSourceType, TemporalSnapshotMixin, CoreBase
+from novelinsights.models.base import TemporalSnapshotMixin, CoreBase
 from novelinsights.models.metadata.agent_metadata import AgentMetadata
-
+from novelinsights.types.knowledge import NodeType
+from novelinsights.types.core import CreationSourceType
 """
 
 The following models are used to represent the knowledge graph.
@@ -31,27 +30,6 @@ They are used to represent the entities and relationships in the world.
 It is all AI generated and is not manually created.
 
 """
-
-class NodeType(Enum):
-    # Entities and Groups
-    CHARACTER = "character"          # Individual beings/personas
-    ORGANIZATION = "organization"    # Groups of any kind
-    
-    LOCATION = "location"           # Any kind of place or space
-    ITEM = "item"                   # Physical or abstract objects
-    CONCEPT = "concept"             # Ideas, systems, powers, theories
-    CULTURE = "culture"             # Distinct societal patterns/practices
-    
-    # Temporal
-    EVENT = "event"                 # Discrete occurrences
-    TIME_PERIOD = "time_period"     # Temporal ranges
-    
-    # Narrative
-    ARC = "arc"                     # Major narrative progressions
-    THEME = "theme"                 # Recurring ideas or motifs
-    
-    OTHER = "other"                 # Other types not listed above
-
 
 class NodeState(TemporalSnapshotMixin, CoreBase):
     """

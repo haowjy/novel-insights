@@ -1,6 +1,5 @@
 # Standard library imports
 from uuid import uuid4
-from enum import Enum
 
 # SQLAlchemy core imports
 from sqlalchemy import (
@@ -24,37 +23,7 @@ from sqlalchemy.orm import relationship, object_session
 from pgvector.sqlalchemy import Vector
 
 from novelinsights.models.base import CoreBase, SlugMixin
-
-class ContentStructureType(Enum):
-    # Narrative Structure (canonical book content)
-    BOOK = "book"
-    VOLUME = "volume"
-    ARC = "arc"
-    CHAPTER = "chapter"
-    SCENE = "scene"
-    PASSAGE = "passage"
-    
-    # Supplementary Content
-    WIKI_ENTRY = "wiki_entry"
-    WORLDBUILDING = "worldbuilding"
-    CHARACTER_SHEET = "character_sheet"
-    PLOT_OUTLINE = "plot_outline"
-    
-    # Generic Structure Types
-    PROJECT = "project"
-    COLLECTION = "collection"  # For arbitrary grouping
-    TIMELINE = "timeline"
-    
-    OTHER = "other"
-    
-    # TODO: idk if we need these
-    # Other Types of Structures
-    # POEM = "poem"
-    # SONG = "song"
-    # PLAY = "play"
-    # MOVIE = "movie"
-    # TV_SHOW = "tv_show"
-    # GAME = "game"
+from novelinsights.types.content import ContentStructureType
     
 class ContentStructure(SlugMixin, CoreBase):
     __tablename__ = 'content_structure'

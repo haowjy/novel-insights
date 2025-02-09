@@ -1,7 +1,4 @@
-# novelinsights/models/knowledge.py
-
-# Standard library imports
-from enum import Enum
+# novelinsights/models/knowledge/relationship.py
 
 # SQLAlchemy core imports
 from sqlalchemy import (
@@ -20,8 +17,9 @@ from sqlalchemy.dialects.postgresql import (
 )
 from sqlalchemy.orm import relationship
 
-from novelinsights.models.base import Base, CreationSourceType, TemporalSnapshotMixin, CoreBase
-
+from novelinsights.models.base import Base, TemporalSnapshotMixin, CoreBase
+from novelinsights.types.core import CreationSourceType
+from novelinsights.types.knowledge import RelationDirectionType, RelationStatusType, RelationType
 
 """
 
@@ -60,41 +58,6 @@ noderelationship_contentunit = Table(
     Column('content_unit_id', UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
     Column('source', SQLEnum(CreationSourceType))
 )
-
-class RelationDirectionType(Enum):
-    OUTBOUND = "outbound"         # Relationship from source to target
-    INBOUND = "inbound"           # Relationship from target to source
-    BIDIRECTIONAL = "bidirectional"  # Mutual relationship
-
-class RelationType(Enum):
-    # Social/Personal
-    FAMILY = "family"             # Family relationships
-    FRIENDSHIP = "friendship"     # Friendships
-    RIVALRY = "rivalry"           # Rivalries/enemies
-    ROMANCE = "romance"           # Romantic relationships
-    
-    # Organizational
-    MEMBERSHIP = "membership"     # Being part of organization/group
-    LEADERSHIP = "leadership"     # Leading/commanding others
-    ALLIANCE = "alliance"         # Alliances between groups/entities
-    
-    # Spatial/Physical
-    LOCATION = "location"         # Physical relationships (contains, near)
-    POSSESSION = "possession"     # Ownership/possession relationships
-    
-    # Abstract/Other
-    KNOWLEDGE = "knowledge"       # Knowledge/awareness relationships
-    INFLUENCE = "influence"       # Impact/effect relationships
-    CAUSATION = "causation"      # Cause-effect relationships
-    OTHER = "other"              # Other types
-
-class RelationStatusType(Enum):
-    ACTIVE = "active"           # Currently valid relationship
-    DORMANT = "dormant"         # Temporarily inactive (e.g., characters separated)
-    BROKEN = "broken"           # Explicitly ended (e.g., breakup, betrayal)
-    DECEASED = "deceased"       # One party died
-    HISTORICAL = "historical"   # Past relationship, no longer current
-    UNKNOWN = "unknown"         # Status unclear or not specified
 
 class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
     """

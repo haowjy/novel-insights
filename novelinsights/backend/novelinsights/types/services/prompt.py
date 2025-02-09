@@ -1,8 +1,10 @@
-from enum import Enum
+from novelinsights.types.base import DescribedEnum
+
 from typing import Type
-    
-class PromptType(Enum):
-    TEMPLATE = "template"
+
+class PromptType(DescribedEnum):
+    BASE = ("base", "Base prompt type")
+    READ_CHAPTER = ("read_chapter", "Read a chapter of a book")
     # CHAPTER_READER = "chapter_reader"
     # ARTICLE_CREATION = "article_creation"
     # NODE_CREATION = "node_creation"
@@ -10,7 +12,7 @@ class PromptType(Enum):
     
     def get_prompt_class(self) -> Type:
         """Get the prompt class for this type"""
-        # from .chapter_reader import ChapterReaderPrompt
+        from novelinsights.services.ai.prompts.narrative.read_chapter import ReadChapterPrompt
         # from .article_creation import ArticleCreationPrompt
         # from .node_creation import NodeCreationPrompt
         # from .node_state_creation import NodeStateCreationPrompt
@@ -21,6 +23,7 @@ class PromptType(Enum):
         #     PromptType.NODE_CREATION: NodeCreationPrompt,
         #     PromptType.NODE_STATE_CREATION: NodeStateCreationPrompt,
         # }
-        # return prompt_map[self]
-        # TODO: Implement this
-        raise NotImplementedError(f"TODO: Implement Prompt class for {self}")
+        prompt_map = {
+            PromptType.READ_CHAPTER: ReadChapterPrompt,
+        }
+        return prompt_map[self]

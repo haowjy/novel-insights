@@ -1,8 +1,9 @@
-from enum import Enum
+from novelinsights.types.base import DescribedEnum
+
 from typing import Type
 
-class AgentType(Enum):
-    TEMPLATE = "template"
+class AgentType(DescribedEnum):
+    Base = ("base", "Base agent type")
     # ENTITY_ANALYZER = "entity_analyzer"
     # SUMMARIZER = "summarizer"
     # RELATIONSHIP_ANALYZER = "relationship_analyzer"

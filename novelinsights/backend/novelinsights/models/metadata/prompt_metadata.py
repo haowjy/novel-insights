@@ -15,7 +15,7 @@ from sqlalchemy.dialects.postgresql import (
 from sqlalchemy.orm import relationship
 
 from novelinsights.models.base import CoreBase
-from novelinsights.services.ai.prompts.types import PromptType
+from novelinsights.types.services.prompt import PromptType
 
 class PromptMetadata(CoreBase):
     __tablename__ = 'prompt_metadata'

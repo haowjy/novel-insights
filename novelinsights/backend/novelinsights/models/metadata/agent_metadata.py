@@ -15,7 +15,7 @@ from sqlalchemy.dialects.postgresql import (
 from sqlalchemy.orm import relationship
 
 from novelinsights.models.base import CoreBase
-from novelinsights.services.ai.agents.types import AgentType
+from novelinsights.types.services.agent import AgentType
 
 class AgentMetadata(CoreBase):
     __tablename__ = 'agent_metadata'

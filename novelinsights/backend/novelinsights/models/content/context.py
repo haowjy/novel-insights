@@ -1,12 +1,12 @@
 # novelinsights/backend/novelinsights/models/content/context.py
 
-from enum import Enum
-
 from sqlalchemy import Column, ForeignKey, Index, String, Text, Integer, Table, Enum as SQLEnum, UniqueConstraint, event
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship, object_session
 
-from novelinsights.models.base import Base, SlugMixin, CoreBase, CreationSourceType
+from novelinsights.models.base import Base, SlugMixin, CoreBase
+from novelinsights.types.core import CreationSourceType
+from novelinsights.types.content import ContextType, ContextScope
 
 
 # Context Association Tables
@@ -35,19 +35,6 @@ context_node_state = Table(
        Column("node_state_id", UUID(as_uuid=True), ForeignKey("node_state.id"), primary_key=True),
        Column("source", SQLEnum(CreationSourceType))
 )
-
-class ContextScope(Enum):
-    GLOBAL = "global"           # Applies to entire work
-    STRUCTURAL = "structural"   # Applies to specific content structures
-    CONTENT_UNIT = "content_unit" # Applies to specific content units
-
-class ContextType(Enum):
-    THEME = "theme"
-    POV = "pov"
-    AUTHOR_NOTE = "author_note"
-    WORLDBUILDING = "worldbuilding"
-    WRITING_GUIDANCE = "writing_guidance"
-    OTHER = "other"
 
 class Context(SlugMixin, CoreBase):
     __tablename__ = 'context'
