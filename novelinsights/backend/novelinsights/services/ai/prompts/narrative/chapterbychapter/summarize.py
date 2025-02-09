@@ -5,18 +5,25 @@ from novelinsights.services.ai.prompts.narrative.mixins import NarrativeExtracti
 from novelinsights.services.ai.prompts.base import PromptBase
 from novelinsights.types.services.prompt import PromptType
 
-class ReadChapterPromptParams(TypedDict):
+class SummarizeChapterPromptParams(TypedDict):
     chapter_id: str
-
-class ReadChapterPrompt(NarrativeExtractionMixin, PromptBase):
+    genres: list[str]
+    chapter_title: str 
+    chapter_content: str # preferred format: markdown
+    
+class SummarizeChapterPrompt(NarrativeExtractionMixin, PromptBase):
     """Prompt for reading a chapter of a book"""
     
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(
+        self, 
+        *args: Any, 
+        **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
     
     @property
     def name(self) -> str:
-        return "read_chapter"
+        return "summarize_chapter"
     
     @property
     def version(self) -> Version:
@@ -24,9 +31,9 @@ class ReadChapterPrompt(NarrativeExtractionMixin, PromptBase):
     
     @property
     def type(self) -> PromptType:
-        return PromptType.READ_CHAPTER
+        return PromptType.SUMMARIZE_CHAPTER
     
     @property
     def description(self) -> str:
-        return "Read a chapter of a book"
+        return "Summarize a chapter of a book"
     

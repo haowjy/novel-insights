@@ -1,8 +1,9 @@
 from dataclasses import dataclass
-from typing import Dict, Any
+from typing import Any, Dict, TypedDict
 from abc import ABC, abstractmethod
 from packaging.version import Version
 
+from novelinsights.core.config import ModelConfig
 from novelinsights.types.services.prompt import PromptType
 
 @dataclass
@@ -20,37 +21,24 @@ class PromptBase(ABC):
     
     def __init__(
         self, 
-        model: str = "claude-3-5-sonnet-20241022",
-        model_params: None | Dict[str, Any] = None,
-        prompt_params: None | Dict[str, Any] = None
-        ):
-        self._model: str = model
-        self._model_params: Dict[str, Any] = model_params or {"max_tokens": 1000}
-        self._prompt_params: Dict[str, Any] = prompt_params or {}
+        model_config: ModelConfig | None = None,
+        prompt_config: Dict[str, Any] | None = None,
+    ) -> None:
+        self._model_config: ModelConfig = model_config or ModelConfig()
+        self._prompt_config: Dict[str, Any] = prompt_config or {}
         self._last_rendered: str = ""
-
-    @property
-    def model(self) -> str:
-        """The model to use for the prompt"""
-        return self._model
     
     @property
-    def model_params(self, **kwargs: Any) -> Dict[str, Any]:
-        """Get or set model parameters"""
-        if kwargs:
-            self._model_params.update(kwargs)
-            
-        return self._model_params
+    def model_config(self) -> ModelConfig:
+        """Model configuration"""
+        return self._model_config
     
     @property
     @abstractmethod
-    def prompt_params(self, **kwargs: Any) -> Dict[str, Any]:
-        """Get or set prompt parameters"""
-        if kwargs:
-            self._prompt_params.update(kwargs)
-        
-        return self._prompt_params
-
+    def prompt_config(self) -> Dict[str, Any]:
+        """Prompt configuration"""
+        raise NotImplementedError("Subclasses must implement this method")
+    
     @property
     def last_rendered(self) -> str:
         """Last rendered prompt"""
