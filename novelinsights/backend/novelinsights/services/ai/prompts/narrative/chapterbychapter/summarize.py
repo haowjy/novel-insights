@@ -9,6 +9,7 @@ from novelinsights.types import (
     Provider,
     PromptType,
 )
+from novelinsights.utils.token import TokenEstimator
 
 @dataclass
 class SummarizeChapterTemplate(NarrativeExtractionMixin, PromptTemplateBase):
@@ -76,12 +77,11 @@ class SummarizeChapterTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         
         p += (
             "\n# Instructions\n"
-            "- Generate a comprehensive but concise summary that captures key narrative developments, character progressions, and plot elements (including potential foreshadowing) from the provided story excerpt.\n"
-            "- Maintain clarity and conciseness\n"
-            "- The summary should reflect only information available to the reader at this point in the story.\n"
-            "- Let's try to be precise about this summary: only include the important stuff. Stuff that can be inferred doesn't have to be included.\n"
+            "- Generate a comprehensive but concise summary that captures key narrative/plot developments, and major literary elements (e.g. foreshadowing, symbolism, allusions, etc.) from the provided story excerpt woven into the summary\n"
+            "- The summary should reflect only information available to the reader at this point in the story, or information that is common knowledge of through literary allusions/pop culture references\n"
+            "- Maintain clarity and conciseness; let's try to be precise about this summary\n"
             "- Separate the summary scene by scene\n"
-            "- Please format the summary using Markdown to provide a clear and readable summary.\n"
+            "- Please format the summary using Markdown to provide a clear and readable summary\n"
             f"- Start the summary with '# Summary of {self.chapter_title}'\n"
         )
         
@@ -108,19 +108,18 @@ class SummarizeChapterPrompt(PromptBase):
     def __init__(
         self,
         model_config: ModelConfig | None = None,
-        prompt_config: SummarizeChapterTemplate | None = None,
+        prompt_template: SummarizeChapterTemplate | None = None,
     ) -> None:
         """Initialize the prompt"""
         if model_config is None:
             model_config = ModelConfig(
-                provider=Provider.ANTHROPIC,
+                provider=Provider.ANTHROPIC, # deepseek r1 distill llama 70B should be good enough, deepseek r1 seems to be the best, o1-mini seems to be good as well, not the best, I think thinking models will be best for this task
+                # Claude 3.5 Sonnet is good for just a summary of the events of the chapter - with some extra prompting, the literary elements can also be extracted well
                 model="claude-3-5-sonnet-20240620",
                 temperature=1.0,
             )
 
-        super().__init__(model_config, prompt_config)
-        self._prompt_config: SummarizeChapterTemplate
-    
+        super().__init__(model_config, prompt_template)
     
     @property
     def name(self) -> str:
@@ -137,28 +136,4 @@ class SummarizeChapterPrompt(PromptBase):
     @property
     def description(self) -> str:
         return "Summarize a chapter of a book"
-    
-    
-    def _prompt(self, **kwargs: Any) -> str:
-        return self.prompt_template.prompt(**kwargs)
-    
-    def render(self, **kwargs: Any) -> PromptRequest:
-        # update prompt config with kwargs
-        
-        pr = PromptRequest(
-            prompt=self.prompt_template.prompt(**kwargs),
-            estimated_tokens=0,
-            estimated_cost=0,
-        )
-        
-        # render the prompt
-        return pr
-    
-    def render_example(self) -> PromptRequest:
-        return PromptRequest(
-            prompt=SummarizeChapterTemplate.template().prompt(),
-            estimated_tokens=0,
-            estimated_cost=0,
-        )
-    
     

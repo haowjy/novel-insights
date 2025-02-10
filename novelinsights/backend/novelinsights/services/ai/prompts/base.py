@@ -5,12 +5,12 @@ from packaging.version import Version
 
 from novelinsights.core.config import ModelConfig
 from novelinsights.types.services.prompt import PromptType
+from novelinsights.utils.token import TokenEstimator
 
 @dataclass
 class PromptRequest:
     prompt: str
     estimated_tokens: int
-    estimated_cost: float
 
 @dataclass
 class PromptTemplateBase(ABC):
@@ -66,28 +66,38 @@ class PromptBase(ABC):
         """Prompt template"""
         return self._prompt_template
     
+    def update_prompt_template(self, **kwargs: Any) -> None:
+        """Update the prompt template"""
+        self._prompt_template.update(**kwargs)
+    
     @property
     def last_rendered(self) -> str:
         """Last rendered prompt"""
         return self._last_rendered
     
-    #
-    # Abstract methods
-    #
-    @abstractmethod
-    def _prompt(self) -> str:
+    def _prompt(self, **kwargs: Any) -> str:
         """Prompt template"""
-        raise NotImplementedError("Subclasses must implement this method")
+        return self._prompt_template.prompt(**kwargs)
     
-    @abstractmethod
     def render(self, **kwargs: Any) -> PromptRequest:
-        """Render the template with given parameters into a prompt and return it as a string"""
-        raise NotImplementedError("Subclasses must implement this method")
+        """Render the prompt with given parameters"""
+        # update prompt config with kwargs
+        p = self._prompt(**kwargs)
+        pr = PromptRequest(
+            prompt=p,
+            estimated_tokens=TokenEstimator.simple(p),
+        )
+        return pr
     
-    @abstractmethod
     def render_example(self) -> PromptRequest:
-        """Render the template with ALL placeholder values. Does not update the last rendered prompt."""
-        raise NotImplementedError("Subclasses must implement this method")
+        """Render an example prompt with all placeholder values"""
+        p = self._prompt_template.template().prompt()
+        pr = PromptRequest(
+            prompt=p,
+            estimated_tokens=TokenEstimator.simple(p),
+        )
+        
+        return pr
     
     #
     # Abstract properties
