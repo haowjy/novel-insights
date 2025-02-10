@@ -5,6 +5,11 @@ from novelinsights.types.base import DescribedEnum
 #
 #
 class NodeType(DescribedEnum):
+    
+    # Temporal
+    EVENT = ("event", "Significant events, occurrences")
+    TIME_PERIOD = ("time_period", "Significant temporal ranges")
+    
     # Entities and Groups
     CHARACTER = ("character", "Significant people, beings, or sentient entities, (including unnamed characters)")
     ORGANIZATION = ("organization", "Significant groups that can be described as a collection of characters")
@@ -13,10 +18,6 @@ class NodeType(DescribedEnum):
     ITEM = ("item", "Significant physical or abstract objects (e.g. weapons, artifacts, technologies)")
     CONCEPT = ("concept", "Significant ideas, systems, powers, theories")
     CULTURE = ("culture", "Significant societal patterns/practices")
-    
-    # Temporal
-    EVENT = ("event", "Significant events, occurrences")
-    TIME_PERIOD = ("time_period", "Significant temporal ranges")
     
     # Narrative
     ARC = ("arc", "Major narrative progressions")

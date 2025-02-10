@@ -80,30 +80,28 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         p += (
             "\n# Guidelines\n\n" +
             "## Entity Categories\n" +
-            "Extract entities in the following categories:\n"
+            "Extract important entities for the following categories:\n"
         )
         
         for i, node in enumerate(NodeType):
             p += (
-                f"{i+1}. {node.name}: {node.description}\n"
+                f"{i+1}. {node.value}s: {node.description}\n"
             )
-
+        
         p += (
-            "\n## For Each Entity Include\n" +
-            "1. Category (from above)\n" +
-            "2. Name/Identifier\n" +
-            "3. Brief Description\n" +
-            "4. Narrative Significance (Why this entity matters in the context of this chapter)\n" +
-            "5. Cross-references (other entities mentioned in the same chapter that are related to this entity)\n" + 
-            "6. Significance Level to the chapter's plot (critical, major, minor, supporting, background, incidental)\n" +
-            "7. Do not include background or incidental entities\n" +
-            "8. Do not include entities that are only mentioned in passing or are not central to the plot of this chapter\n"
+            "\n## For Each Significant Entity Include the fields in a SPARSE JSON format:\n" +
+            "- Main Identifier\n" +
+            "- Aliases (all names for the entity)\n" +
+            "- Description of the entity (what the entity is, what it does, etc)\n" +
+            "- Narrative Significance (Why this entity matters in the context of this chapter, Any major literary elements-foreshadowing, symbolism, allusions, etc-important to understand the chapter)\n" +
+            "- Significance Level to the chapter's plot (central - crucial to everything; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important to current events; peripheral - mentioned but barely relevant)\n" +
+            "- other related entities mentioned\n"
         )
         
         p += (
             "\n## Extraction Rules\n" +
-            "- Extract only entities with clear narrative significance\n" +
-            "- Entities that are the same should be the same entity\n" +
+            "- Extract only entities with clear narrative significance that will be important across the entire story, not just mentioned in this chapter\n" +
+            "- Entities that reference the exact same entity should be the same entity (describe the entity in more detail if needed)\n" +
             "- Include both explicitly named and strongly implied entities\n" +
             "- Note uncertainty when entity details are ambiguous\n" +
             "- Focus on quality over quantity - only include truly significant entities\n" +
@@ -113,13 +111,41 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         p += (
             "\n## Important Notes\n" +
             "- Sort entities by category, then by order of appearance\n" +
-            "- Include cross-references between related entities\n" +
             "- Note if an entity's nature or description is unclear or evolving\n" +
             "- Maintain focus on this chapter's content only\n" +
-            "- Please format the entities using Markdown to provide a clear and readable list\n" +
-            f"- Start with '# Entity Extraction' and don't include any else other than the list of entities\n"
+            "- Please format the entities using JSON to make it easy to parse\n"
         )
-
+        
+        p += (
+            "\n## Example Output" +
+"""
+{
+    ...
+    "characters": [
+        {
+            "identifier": "John Doe",
+            "aliases": ["John", "Doe", "JD", "Protagonist"],
+            "description": "A young man with a kind heart and a strong sense of justice.",
+            "narrative_significance": "John Doe is the protagonist of the story, and his journey is central to the plot.",
+            "significance_level": "central",
+            "related_entities": ["Jane Smith", "Bob Johnson"]
+        },
+        {
+            "identifier": "John Doe's Dog",
+            "aliases": [],
+            "description": "A loyal and friendly dog who accompanies John Doe on his journey.",
+            "narrative_significance": "The dog is a companion to John Doe and provides emotional support throughout the story.",
+            "significance_level": "supporting",
+            "related_entities": ["John Doe"]
+        },
+        ...
+    ],
+    ...
+    "arcs": [],
+    ...
+}
+"""
+        )
         return p
     
     @classmethod
