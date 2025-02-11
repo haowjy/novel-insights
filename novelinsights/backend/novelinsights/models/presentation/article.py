@@ -17,7 +17,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship, object_session
 from sqlalchemy import Enum as SQLEnum
 from novelinsights.models.base import Base, SlugMixin, TemporalSnapshotMixin, CoreBase, CreationSourceType
-from novelinsights.models.knowledge.node import NodeType
+from novelinsights.models.knowledge.entity import EntityType
 
 """
 
@@ -40,12 +40,12 @@ articlesnapshot_contentunit = Table(
                     name='uq_article_content_sequence')
 )
 
-# Association table for articles to nodes
-articlesnapshot_nodestate = Table(
-    'articlesnapshot_nodestate',
+# Association table for articles to entities
+articlesnapshot_entitystate = Table(
+    'articlesnapshot_entitystate',
     Base.metadata,
     Column('article_snapshot_id', UUID(as_uuid=True), ForeignKey('article_snapshot.id'), primary_key=True),
-    Column('node_state_id', UUID(as_uuid=True), ForeignKey('node_state.id'), primary_key=True),
+    Column('entity_state_id', UUID(as_uuid=True), ForeignKey('entity_state.id'), primary_key=True),
     Column('is_primary', Boolean, default=False),  # Optional: to mark the main subject if needed
 )
 
@@ -93,11 +93,11 @@ class ArticleSnapshot(TemporalSnapshotMixin, SlugMixin, CoreBase):
         order_by='article_content_unit.c.sequence'
     )
     
-    # Nodes
-    node_states = relationship(
-        'NodeState',
-        secondary=articlesnapshot_nodestate,
-        order_by='articlesnapshot_nodestate.c.is_primary'
+    # Entities
+    entity_states = relationship(
+        'EntityState',
+        secondary=articlesnapshot_entitystate,
+        order_by='articlesnapshot_entitystate.c.is_primary'
     )
     
     # Metadata
@@ -118,7 +118,7 @@ class Article(SlugMixin, CoreBase):
     
     # Core identity fields
     title = Column(String(255), nullable=False)
-    type = Column(SQLEnum(NodeType), nullable=False)
+    type = Column(SQLEnum(EntityType), nullable=False)
     
     # Defer the foreign key constraint creation
     latest_snapshot_id = Column(UUID(as_uuid=True), 
@@ -144,7 +144,7 @@ def generate_article_slug(mapper, connection, target):
             session,
             Article,
             target.title,
-            target.node_id,
+            target.entity_id,
             getattr(target, 'id', None)
         )
         

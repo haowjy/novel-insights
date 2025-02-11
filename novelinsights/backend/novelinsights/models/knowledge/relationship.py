@@ -30,7 +30,7 @@ Key components:
 - Enums defining relationship directions, types, and statuses
 - Models for relationship states and relationships themselves
 
-The models are used to represent connections between nodes in the knowledge graph, capturing:
+The models are used to represent connections between entities in the knowledge graph, capturing:
 - Directionality (outbound, inbound, bidirectional)
 - Type (family, friendship, rivalry, etc.)
 - Status (active, dormant)
@@ -42,29 +42,29 @@ These models form the core of the relationship representation in the knowledge g
 """
 
 # NEW: Define the association table for Relationship <--> Context
-noderelationship_context = Table(
-    "noderelationship_context",
+relationship_context = Table(
+    "relationship_context",
     Base.metadata,
-    Column('node_relationship_id', UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
+    Column('relationship_id', UUID(as_uuid=True), ForeignKey("relationship.id"), primary_key=True),
     Column('context_id', UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
     Column('source', SQLEnum(CreationSourceType))
 )
 
 # NEW: Define the association table for Relationship <--> ContentUnit
-noderelationship_contentunit = Table(   
-    "noderelationship_contentunit",
+relationship_contentunit = Table(   
+    "relationship_contentunit",
     Base.metadata,
-    Column('node_relationship_id', UUID(as_uuid=True), ForeignKey("node_relationship.id"), primary_key=True),
+    Column('relationship_id', UUID(as_uuid=True), ForeignKey("relationship.id"), primary_key=True),
     Column('content_unit_id', UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
     Column('source', SQLEnum(CreationSourceType))
 )
 
-class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
+class RelationshipState(TemporalSnapshotMixin, CoreBase):
     """
     A relationship state represents the state of a relationship at a specific point
     in the content or context.
     """
-    __tablename__ = 'node_relationship_state'
+    __tablename__ = 'relationship_state'
     
     # Override creation source for relationship_states to default to AI
     creation_source = Column(SQLEnum(CreationSourceType), 
@@ -72,8 +72,8 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
                          default=CreationSourceType.AI,
                          index=True)
     
-    node_relationship_id = Column(UUID(as_uuid=True), ForeignKey('node_relationship.id'), nullable=False)
-    node_relationship = relationship('NodeRelationship', back_populates='states')
+    relationship_id = Column(UUID(as_uuid=True), ForeignKey('relationship.id'), nullable=False)
+    parent_relationship = relationship('Relationship', back_populates='states')
 
     # Status at this point in content
     status = Column(SQLEnum(RelationStatusType), 
@@ -104,12 +104,12 @@ class NodeRelationshipState(TemporalSnapshotMixin, CoreBase):
 
 
 
-class NodeRelationship(CoreBase):
+class Relationship(CoreBase):
     """
-    A relationship represents a connection between two nodes in the knowledge graph.
-    Like nodes, relationships can have states that change over time/context.
+    A relationship represents a connection between two entities in the knowledge graph.
+    Like entities, relationships can have states that change over time/context.
     """
-    __tablename__ = 'node_relationship'
+    __tablename__ = 'relationship'
     
     # Override creation source for relationships to default to AI
     creation_source = Column(SQLEnum(CreationSourceType), 
@@ -124,18 +124,18 @@ class NodeRelationship(CoreBase):
                           index=True)
     
     # Core relationship fields
-    source_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
-    source_node = relationship(
-        "Node",
-        foreign_keys=[source_node_id],
+    source_entity_id = Column(UUID(as_uuid=True), ForeignKey('entity.id'), nullable=False)
+    source_entity = relationship(
+        "Entity",
+        foreign_keys=[source_entity_id],
         back_populates='relationships',
         overlaps="relationships",
         )
     
-    target_node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
-    target_node = relationship(
-        "Node",
-        foreign_keys=[target_node_id],
+    target_entity_id = Column(UUID(as_uuid=True), ForeignKey('entity.id'), nullable=False)
+    target_entity = relationship(
+        "Entity",
+        foreign_keys=[target_entity_id],
         back_populates='relationships',
         overlaps="relationships",
         )
@@ -149,6 +149,6 @@ class NodeRelationship(CoreBase):
 
     # Relationship States
     states = relationship(
-        'NodeRelationshipState', 
-        back_populates='node_relationship'
+        'RelationshipState', 
+        back_populates='parent_relationship'
         )

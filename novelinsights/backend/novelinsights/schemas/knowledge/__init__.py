@@ -1,34 +1,27 @@
-from novelinsights.schemas.knowledge.node import (
-    NodeBase, Node, NodeCreate, NodeUpdate,
-    NodeStateBase, NodeState, NodeStateCreate, NodeStateUpdate, 
+from novelinsights.schemas.knowledge.entity import (
+    EntityStateBase, EntityState, EntityStateCreate, EntityStateUpdate,
 )
 from novelinsights.schemas.knowledge.relationship import (
-    NodeRelationshipBase, NodeRelationship, NodeRelationshipCreate, NodeRelationshipUpdate,
-    NodeRelationshipStateBase, NodeRelationshipState, NodeRelationshipStateCreate, NodeRelationshipStateUpdate,
+    RelationshipBase, Relationship, RelationshipCreate, RelationshipUpdate,
+    RelationshipStateBase, RelationshipState, RelationshipStateCreate, RelationshipStateUpdate,
 )
 
 __all__ = [
-    # Node State schemas
-    "NodeStateBase",
-    "NodeState",
-    "NodeStateCreate",
-    "NodeStateUpdate",
+    # Entity
+    "EntityStateBase",
+    "EntityState",
+    "EntityStateCreate",
+    "EntityStateUpdate",
     
-    # Node schemas
-    "NodeBase",
-    "Node",
-    "NodeCreate",
-    "NodeUpdate",
+    # Relationship State
+    "RelationshipStateBase",
+    "RelationshipState",
+    "RelationshipStateCreate",
+    "RelationshipStateUpdate",
     
-    # Relationship State schemas
-    "NodeRelationshipStateBase",
-    "NodeRelationshipState",
-    "NodeRelationshipStateCreate",
-    "NodeRelationshipStateUpdate",
-    
-    # Relationship schemas
-    "NodeRelationshipBase",
-    "NodeRelationship",
-    "NodeRelationshipCreate",
-    "NodeRelationshipUpdate",
+    # Relationship
+    "RelationshipBase",
+    "Relationship",
+    "RelationshipCreate",
+    "RelationshipUpdate",
 ] 

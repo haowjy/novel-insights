@@ -3,7 +3,7 @@ from uuid import UUID
 from typing import Optional, List
 from pydantic import BaseModel
 
-from novelinsights.models.knowledge.node import NodeType
+from novelinsights.models.knowledge.entity import EntityType
 from novelinsights.schemas.base import CoreBase, BaseConfig, TemporalSnapshotBase, SlugBase
 
 class ArticleSnapshotBase(CoreBase, TemporalSnapshotBase, SlugBase):
@@ -44,7 +44,7 @@ class ArticleSnapshotUpdate(BaseConfig):
 class ArticleBase(CoreBase, SlugBase):
     """Base schema for article without ID fields"""
     title: str
-    type: NodeType
+    type: EntityType
     latest_snapshot_id: Optional[UUID] = None
 
     class Config:
@@ -65,7 +65,7 @@ class Article(ArticleBase):
 class ArticleUpdate(BaseConfig):
     """Schema for updating an article"""
     title: Optional[str] = None
-    type: Optional[NodeType] = None
+    type: Optional[EntityType] = None
     latest_snapshot_id: Optional[UUID] = None
 
     class Config:

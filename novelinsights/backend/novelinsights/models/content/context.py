@@ -28,12 +28,13 @@ context_contentunit = Table(
     Column("source", SQLEnum(CreationSourceType))
 )
 
-context_node_state = Table(
-       "context_node_state",
-       Base.metadata,
-       Column("context_id", UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
-       Column("node_state_id", UUID(as_uuid=True), ForeignKey("node_state.id"), primary_key=True),
-       Column("source", SQLEnum(CreationSourceType))
+# Association table for Context <--> EntityState
+context_entity_state = Table(
+    "context_entity_state",
+    Base.metadata,
+    Column("context_id", UUID(as_uuid=True), ForeignKey("context.id"), primary_key=True),
+    Column("entity_state_id", UUID(as_uuid=True), ForeignKey("entity_state.id"), primary_key=True),
+    Column("source", SQLEnum(CreationSourceType))
 )
 
 class Context(SlugMixin, CoreBase):
@@ -60,10 +61,10 @@ class Context(SlugMixin, CoreBase):
         back_populates='contexts', 
         secondary='context_contentunit',
     )
-    node_states = relationship(
-        'NodeState',
-        back_populates='contexts', 
-        secondary='context_node_state',
+    entity_states = relationship(
+        'EntityState',
+        back_populates='contexts',
+        secondary='context_entity_state'
     )
     
     __table_args__ = (

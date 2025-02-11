@@ -1,11 +1,11 @@
-from typing import Any, Optional
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
 from sympy import Equality
 
 from novelinsights.services.ai.prompts.narrative.mixins import NarrativeExtractionMixin
-from novelinsights.services.ai.prompts.base import PromptTemplateBase
-from novelinsights.types.knowledge import NodeType
+from novelinsights.services.ai.prompts.base import PromptBase, PromptTemplateBase
+from novelinsights.types.knowledge import EntityType
 
 @dataclass
 class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
@@ -83,9 +83,9 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
             "Extract important entities for the following categories:\n"
         )
         
-        for i, node in enumerate(NodeType):
+        for i, entity in enumerate(EntityType):
             p += (
-                f"{i+1}. {node.value}s: {node.description}\n"
+                f"{i+1}. {entity.value}s: {entity.description}\n"
             )
         
         p += (

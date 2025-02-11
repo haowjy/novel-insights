@@ -4,8 +4,8 @@ from novelinsights.models.core.user import User
 from novelinsights.models.content.content_unit import ContentUnit
 from novelinsights.models.content.context import Context
 from novelinsights.models.content.structure import ContentStructure
-from novelinsights.models.knowledge.node import Node, NodeState
-from novelinsights.models.knowledge.relationship import NodeRelationship, NodeRelationshipState
+from novelinsights.models.knowledge.entity import Entity, EntityState
+from novelinsights.models.knowledge.relationship import Relationship, RelationshipState
 from novelinsights.models.metadata.agent_metadata import AgentMetadata
 from novelinsights.models.metadata.prompt_metadata import PromptMetadata
 from novelinsights.models.presentation.article import Article, ArticleSnapshot
@@ -17,10 +17,10 @@ __all__ = [
     "ContentUnit",
     "Context",
     "ContentStructure",
-    "Node",
-    "NodeState",
-    "NodeRelationship",
-    "NodeRelationshipState",
+    "Entity",
+    "EntityState",
+    "Relationship",
+    "RelationshipState",
     "AgentMetadata",
     "PromptMetadata",
     "Article",

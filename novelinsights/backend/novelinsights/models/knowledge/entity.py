@@ -21,7 +21,7 @@ from pgvector.sqlalchemy import Vector
 
 from novelinsights.models.base import TemporalSnapshotMixin, CoreBase
 from novelinsights.models.metadata.agent_metadata import AgentMetadata
-from novelinsights.types.knowledge import NodeType
+from novelinsights.types.knowledge import EntityType
 from novelinsights.types.core import CreationSourceType
 """
 
@@ -31,42 +31,42 @@ It is all AI generated and is not manually created.
 
 """
 
-class NodeState(TemporalSnapshotMixin, CoreBase):
+class EntityState(TemporalSnapshotMixin, CoreBase):
     """
-    A node state is a collection of knowledge about a node.
-    It is the child of a node and contains the actual knowledge about the node.
+    An entity state is a collection of knowledge about an entity.
+    It is the child of an entity and contains the actual knowledge about the entity.
     """
-    __tablename__ = 'node_state'
+    __tablename__ = 'entity_state'
     
-    # Override creation source for node_states to default to AI
+    # Override creation source for entity_states to default to AI
     creation_source = Column(SQLEnum(CreationSourceType), 
                           nullable=False, 
                           default=CreationSourceType.AI,
                           index=True)
     
-    # reference to the node that this state belongs to
-    node_id = Column(UUID(as_uuid=True), ForeignKey('node.id'), nullable=False)
-    node = relationship('Node', back_populates='states')
+    # reference to the entity that this state belongs to
+    entity_id = Column(UUID(as_uuid=True), ForeignKey('entity.id'), nullable=False)
+    entity = relationship('Entity', back_populates='states')
     
-    # reference to the content units that this node state references from
+    # reference to the content units that this entity state references from
     content_units = relationship(
         'ContentUnit', 
-        back_populates='node_states',
-        secondary='contentunit_nodestate'
+        back_populates='entity_states',
+        secondary='contentunit_entitystate'
     )
     
-    # reference to the article snapshots that this node state references from
+    # reference to the article snapshots that this entity state references from
     article_snapshots = relationship(
         'ArticleSnapshot', 
-        back_populates='node_states',
-        secondary='articlesnapshot_nodestate'
+        back_populates='entity_states',
+        secondary='articlesnapshot_entitystate'
     )
     
-    # reference to the contexts that this node state references from
+    # reference to the contexts that this entity state references from
     contexts = relationship(
         'Context',
-        back_populates='node_states',
-        secondary='context_node_state'
+        back_populates='entity_states',
+        secondary='context_entity_state'
     )
     
     # AI-generated fields
@@ -96,9 +96,9 @@ class NodeState(TemporalSnapshotMixin, CoreBase):
     state_embedding = Column(Vector(1536))  # Adjust dimension based on model,
     
     __table_args__ = (
-        Index('ix_node_state_ts_vector', 'ts_vector', postgresql_using='gin'),
+        Index('ix_entity_state_ts_vector', 'ts_vector', postgresql_using='gin'),
         Index(
-            'node_state_embedding_idx',
+            'entity_state_embedding_idx',
             state_embedding,
             postgresql_using='hnsw',
             postgresql_with={'m': 16, 'ef_construction': 64},
@@ -106,23 +106,23 @@ class NodeState(TemporalSnapshotMixin, CoreBase):
         )
     )
     
-    # Agent history metadata if this node was created by an ai agent (nodes are always created by an agent)
-    # one node to one agent metadata
+    # Agent history metadata if this entity was created by an ai agent (entities are always created by an agent)
+    # one entity to one agent metadata
     agent_metadata_id = Column(UUID(as_uuid=True), ForeignKey('agent_metadata.id'), nullable=False)
     agent_metadata = relationship(AgentMetadata)
 
 
 
-class Node(CoreBase):
+class Entity(CoreBase):
     """
-    A node is a single entity in the knowledge graph.
+    An entity is a single entity in the knowledge graph.
     It is the core of the knowledge graph and is used to represent entities in the world.
-    Parent of node states that actually contain the knowledge.
+    Parent of entity states that actually contain the knowledge.
     Usually created by an AI agent.
     """
-    __tablename__ = 'node'
+    __tablename__ = 'entity'
     
-    # Override creation source for nodes to default to AI
+    # Override creation source for entities to default to AI
     creation_source = Column(SQLEnum(CreationSourceType), 
                           nullable=False, 
                           default=CreationSourceType.AI,
@@ -130,7 +130,7 @@ class Node(CoreBase):
     
     # Core identity fields
     name = Column(String(255), nullable=False, index=True)
-    node_type = Column(SQLEnum(NodeType), nullable=False, index=True)
+    entity_type = Column(SQLEnum(EntityType), nullable=False, index=True)
     
     # flexible type classification with more nuance
     optional_type = Column(String(255), index=True)
@@ -141,14 +141,15 @@ class Node(CoreBase):
     
     # Relationships
     # It's states over time
-    states = relationship('NodeState', back_populates='node')
+    states = relationship('EntityState', back_populates='entity')
     
     # Relationships
     relationships = relationship(
-        "NodeRelationship",
-        primaryjoin="or_(Node.id==NodeRelationship.source_node_id, Node.id==NodeRelationship.target_node_id)",
+        "Relationship",
+        primaryjoin="or_(Entity.id==Relationship.source_entity_id, Entity.id==Relationship.target_entity_id)",
+        overlaps="relationships"
     )
     
     __table_args__ = (
-        Index('ix_node_ts_vector', 'ts_vector', postgresql_using='gin'),
+        Index('ix_entity_ts_vector', 'ts_vector', postgresql_using='gin'),
     )

@@ -4,7 +4,7 @@ from novelinsights.types.base import DescribedEnum
 # Knowledge Graph
 #
 #
-class NodeType(DescribedEnum):
+class EntityType(DescribedEnum):
     
     # Temporal
     EVENT = ("event", "Significant events, occurrences")

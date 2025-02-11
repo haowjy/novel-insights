@@ -1,35 +1,33 @@
 from novelinsights.schemas.base import CoreBase, CreationSourceType, TemporalSnapshotBase, SlugBase
 from novelinsights.schemas.content.content_unit import (
-    ContentUnitBase, ContentUnit, ContentUnitCreate, ContentUnitUpdate
+    ContentUnitBase, ContentUnit, ContentUnitCreate, ContentUnitUpdate,
 )
 from novelinsights.schemas.content.context import (
-    ContextBase, ContextCreate, ContextUpdate,
+    ContextBase, Context, ContextCreate, ContextUpdate,
     ContextType, ContextScope
 )
 from novelinsights.schemas.content.structure import (
-    ContentStructure, ContentStructureCreate, ContentStructureUpdate,
+    ContentStructureBase, ContentStructure, ContentStructureCreate, ContentStructureUpdate,
     ContentStructureType
 )
 from novelinsights.schemas.core.user import User, UserCreate, UserUpdate
-from novelinsights.schemas.knowledge.node import (
-    Node, NodeCreate, NodeUpdate,
-    NodeState, NodeStateCreate, NodeStateUpdate,
-    NodeType
+from novelinsights.schemas.knowledge.entity import (
+    EntityState, EntityStateCreate, EntityStateUpdate,
+    EntityType
 )
 from novelinsights.schemas.knowledge.relationship import (
-    NodeRelationship, NodeRelationshipCreate, NodeRelationshipUpdate,
-    NodeRelationshipState, NodeRelationshipStateCreate, NodeRelationshipStateUpdate,
-    RelationDirectionType, RelationType, RelationStatusType,
-)
-from novelinsights.schemas.presentation.article import (
-    Article, ArticleCreate, ArticleUpdate,
-    ArticleSnapshot, ArticleSnapshotCreate, ArticleSnapshotUpdate
+    Relationship, RelationshipCreate, RelationshipUpdate,
+    RelationshipState, RelationshipStateCreate, RelationshipStateUpdate,
 )
 from novelinsights.schemas.metadata.agent_metadata import (
-    AgentMetadata, AgentMetadataCreate, AgentMetadataUpdate
+    AgentMetadataBase, AgentMetadata, AgentMetadataCreate, AgentMetadataUpdate,
 )
 from novelinsights.schemas.metadata.prompt_metadata import (
-    PromptMetadata, PromptMetadataCreate, PromptMetadataUpdate
+    PromptMetadataBase, PromptMetadata, PromptMetadataCreate, PromptMetadataUpdate,
+)
+from novelinsights.schemas.presentation.article import (
+    ArticleBase, Article, ArticleCreate, ArticleUpdate,
+    ArticleSnapshotBase, ArticleSnapshot, ArticleSnapshotCreate, ArticleSnapshotUpdate,
 )
 
 __all__ = [
@@ -47,12 +45,14 @@ __all__ = [
     
     # Context schemas
     "ContextBase",
+    "Context",
     "ContextCreate",
     "ContextUpdate",
     "ContextType",
     "ContextScope",
     
     # Content Structure schemas
+    "ContentStructureBase",
     "ContentStructure",
     "ContentStructureCreate",
     "ContentStructureUpdate",
@@ -63,39 +63,39 @@ __all__ = [
     "UserCreate",
     "UserUpdate",
     
-    # Knowledge Node schemas
-    "Node",
-    "NodeCreate",
-    "NodeUpdate",
-    "NodeState",
-    "NodeStateCreate",
-    "NodeStateUpdate",
-    "NodeType",
+    # Knowledge Graph - Entity
+    "EntityState",
+    "EntityStateCreate",
+    "EntityStateUpdate",
+    "EntityType",
     
-    # Knowledge Relationship schemas
-    "NodeRelationship",
-    "NodeRelationshipCreate",
-    "NodeRelationshipUpdate",
-    "NodeRelationshipState",
-    "NodeRelationshipStateCreate",
-    "NodeRelationshipStateUpdate",
-    "RelationDirectionType",
-    "RelationType",
-    "RelationStatusType",
+    # Knowledge Graph - Relationship
+    "Relationship",
+    "RelationshipCreate",
+    "RelationshipUpdate",
+    "RelationshipState",
+    "RelationshipStateCreate",
+    "RelationshipStateUpdate",
     
-    # Presentation schemas
-    "Article",
-    "ArticleCreate",
-    "ArticleUpdate",
-    "ArticleSnapshot",
-    "ArticleSnapshotCreate",
-    "ArticleSnapshotUpdate",
-    
-    # Metadata schemas
+    # Agent Metadata
+    "AgentMetadataBase",
     "AgentMetadata",
     "AgentMetadataCreate",
     "AgentMetadataUpdate",
+    
+    # Prompt Metadata
+    "PromptMetadataBase",
     "PromptMetadata",
     "PromptMetadataCreate",
     "PromptMetadataUpdate",
+    
+    # Article
+    "ArticleBase",
+    "Article",
+    "ArticleCreate",
+    "ArticleUpdate",
+    "ArticleSnapshotBase",
+    "ArticleSnapshot",
+    "ArticleSnapshotCreate",
+    "ArticleSnapshotUpdate",
 ]

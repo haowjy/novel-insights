@@ -8,16 +8,17 @@ from novelinsights.models.content.context import ContextScope, ContextType
 from novelinsights.schemas.base import BaseConfig, CoreBase, SlugBase
 from novelinsights.schemas.content.content_unit import ContentUnit
 from novelinsights.schemas.content.structure import ContentStructure
-from novelinsights.schemas.knowledge.node import NodeState
+from novelinsights.schemas.knowledge.entity import EntityState
 
 class ContextBase(CoreBase, SlugBase): # NOTE: Do we need to inherit from SlugBase?
     """Base schema for context without ID fields"""
-    type: ContextType = Field(..., description="Type of context")
-    scope: ContextScope = Field(..., description="Scope of context")
-    title: str = Field(..., max_length=255, description="Title of the context")
-    content: str = Field(..., description="Content of the context")
-    properties: Optional[Dict[str, Any]] = Field(None, description="Additional properties")
-    sequence: Optional[int] = Field(None, description="Ordering within same type/scope")
+    name: str
+    description: Optional[str] = None
+    type: ContextType
+    scope: ContextScope
+    parent_id: Optional[UUID] = None
+    content_structure_id: Optional[UUID] = None
+    entity_states: List[EntityState] = Field([], description="Associated entity states")
 
 # TODO: Add create schema
 
@@ -31,13 +32,12 @@ class Context(ContextBase):
     """Complete context schema with all fields"""
     structures: List[ContentStructure] = Field([], description="Associated content structures")
     content_units: List[ContentUnit] = Field([], description="Associated content units")
-    node_states: List[NodeState] = Field([], description="Associated node states")
 
 class ContextUpdate(BaseConfig):
     """Schema for updating a context"""
-    type: Optional[ContextType] = Field(None, description="Updated type of context")
-    scope: Optional[ContextScope] = Field(None, description="Updated scope of context")
-    title: Optional[str] = Field(None, max_length=255, description="Updated title")
-    content: Optional[str] = Field(None, description="Updated content")
-    properties: Optional[Dict[str, Any]] = Field(None, description="Updated properties")
-    sequence: Optional[int] = Field(None, description="Updated sequence")
+    name: Optional[str] = None
+    description: Optional[str] = None
+    type: Optional[ContextType] = None
+    scope: Optional[ContextScope] = None
+    parent_id: Optional[UUID] = None
+    content_structure_id: Optional[UUID] = None

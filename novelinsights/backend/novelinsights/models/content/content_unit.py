@@ -16,10 +16,10 @@ contentunit_contentstructure = Table(
     Column("source", SQLEnum(CreationSourceType))
 )
 
-contentunit_nodestate = Table(
-       "contentunit_nodestate",
+contentunit_entitystate = Table(
+       "contentunit_entitystate",
        Base.metadata,
-       Column("node_state_id", UUID(as_uuid=True), ForeignKey("node_state.id"), primary_key=True),
+       Column("entity_state_id", UUID(as_uuid=True), ForeignKey("entity_state.id"), primary_key=True),
        Column("content_unit_id", UUID(as_uuid=True), ForeignKey("content_unit.id"), primary_key=True),
        Column("source", SQLEnum(CreationSourceType))
 )
@@ -49,11 +49,11 @@ class ContentUnit(CoreBase):
         back_populates='content_units', 
         secondary='context_contentunit')
     
-    # Node States Relationships
-    node_states = relationship(
-        'NodeState',
+    # Entity States Relationships
+    entity_states = relationship(
+        'EntityState',
         back_populates='content_units',
-        secondary='contentunit_nodestate'
+        secondary='contentunit_entitystate'
     )
     
     # Presentation Relationships
