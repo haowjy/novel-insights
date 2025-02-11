@@ -15,6 +15,8 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
     story_summary: Optional[str] = None # summary of the entire story so far
     last_n_chapters_summary: Optional[str] = None # concatenate the summaries of the last n chapters
     
+    is_structured_output: bool = True # whether to use structured output offered by openAI or gemini so far 2025-10-02
+    
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
 
@@ -71,35 +73,34 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
             )
         
         p += (
-            "\n## For Each Significant Entity Include the fields in a SPARSE JSON format:\n" +
-            "- Main Identifier\n" +
-            "- Aliases (all names for the entity)\n" +
+            "\n## Format\n" +
+            "For each entity, include the following fields:\n" +
+            "- Main Identifier of the entity that will be used to reference the entity and you believe is unique\n" +
+            "- Aliases (all names and other identifiers for the entity)\n" +
             "- Description of the entity (what the entity is, what it does, etc)\n" +
-            "- Narrative Significance (Why this entity matters in the context of this chapter, Any major literary elements-foreshadowing, symbolism, allusions, etc-important to understand the chapter)\n" +
+            "- Narrative Significance (why this entity matters in the context of this chapter)\n" +
             "- Significance Level to the chapter's plot (central - crucial to everything; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important to current events; peripheral - mentioned but barely relevant)\n" +
             "- other related entities mentioned\n"
         )
         
         p += (
             "\n## Extraction Rules\n" +
-            "- Extract only entities with clear narrative significance that will be important across the entire story, not just mentioned in this chapter\n" +
-            "- Entities that reference the exact same entity should be the same entity (describe the entity in more detail if needed)\n" +
+            "- Extract only entities with clear narrative significance that will be important across the entire story\n" +
+            "- Make sure to combine entities that reference the same entity (describe the entity in more detail if needed)\n" +
             "- Include both explicitly named and strongly implied entities\n" +
             "- Note uncertainty when entity details are ambiguous\n" +
-            "- Focus on quality over quantity - only include truly significant entities\n" +
-            "- Maintain chapter-specific focus (only what's mentioned/relevant in this chapter)\n"
+            "- Focus on quality over quantity - only include truly significant entities\n"
         )
         
         p += (
             "\n## Important Notes\n" +
             "- Make sure only significant entities are included\n" +
             "- Note if an entity's nature or description is unclear or evolving\n" +
-            "- Maintain focus on this chapter's content only\n" +
-            "- Please format the entities using JSON with ```json to make it easy to parse\n"
+            ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.is_structured_output else "")
         )
         
-        p += (
-            "\n## Example Output" +
+        if not self.is_structured_output:
+            p += ("\n## Example Output" +
 """
 ```json
 {
@@ -127,8 +128,7 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
     ...
 }
 ```
-"""
-        )
+""")
         return p
     
     @classmethod
@@ -143,6 +143,7 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
             chapter_content="{{chapter_content}}",
             story_summary="{{story_summary}}",
             last_n_chapters_summary="{{last_n_chapters_summary}}",
+            is_structured_output=False,
         )
 
 
@@ -158,12 +159,12 @@ class FindEntitiesPrompt(PromptBase):
         if model_config is None:
             # gemini-2.0-flash-001 seems to be good for this task
             # gemini-2.0-flash-lite-preview-02-05 seems to also be good for this task
-            # nice b/c its super cheap
+            # nice b/c they are super cheap, plus they have structured output - https://ai.google.dev/gemini-api/docs/structured-output?lang=python
             # interestingly, thinking models are NOT good for this task
             model_config = ModelConfig(
                 provider=Provider.GEMINI,
                 model="gemini-2.0-flash-001",
-                temperature=1.0,
+                temperature=0.8,
             )
 
         super().__init__(model_config, prompt_template)
@@ -183,4 +184,3 @@ class FindEntitiesPrompt(PromptBase):
     @property
     def description(self) -> str:
         return "Extract all narratively significant entities from a chapter of a book"
-    

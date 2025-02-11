@@ -24,6 +24,7 @@ pgvector = "^0.3.6"
 sentence-transformers = "^3.4.1"
 pydantic = {extras = ["email"], version = "^2.10.6"}
 pydantic-settings = "^2.7.1"
+google-genai = "^1.1.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -24,6 +24,10 @@ class EntityType(DescribedEnum):
     ARC = ("arc", "Major narrative progressions")
     THEME = ("theme", "Recurring ideas or motifs")
     
+    # Literary Elements
+    SYMBOLISM = ("symbolism", "Significant symbols and their meanings")
+    ALLUSION = ("allusion", "References to other works, events, or cultural touchpoints")
+    
     OTHER = ("other", "Other types not listed above")
 
 
