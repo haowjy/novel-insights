@@ -7,12 +7,13 @@ from novelinsights.types.base import DescribedEnum
 class EntityType(DescribedEnum):
     
     # Temporal
-    EVENT = ("event", "Significant events, occurrences")
     TIME_PERIOD = ("time_period", "Significant temporal ranges")
+    EVENT = ("event", "Significant events, occurrences")
     
     # Entities and Groups
+    ORGANIZATION = ("organization", "Formal institutions with defined hierarchies, leadership, and clear purpose")
+    GROUP = ("group", "Significant groups that can be described as a collection of characters")
     CHARACTER = ("character", "Significant people, beings, or sentient entities, (including unnamed characters)")
-    ORGANIZATION = ("organization", "Significant groups that can be described as a collection of characters")
     
     LOCATION = ("location", "Significant places or spaces, (including unnamed locations)")
     ITEM = ("item", "Significant physical or abstract objects (e.g. weapons, artifacts, technologies)")

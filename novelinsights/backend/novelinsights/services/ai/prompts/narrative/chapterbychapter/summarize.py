@@ -3,7 +3,7 @@ from typing import Any, Optional, NotRequired
 from packaging.version import Version
 
 from novelinsights.core.config import ModelConfig
-from novelinsights.services.ai.prompts.narrative.mixins import NarrativeExtractionMixin
+from novelinsights.services.ai.prompts.narrative.mixins import NarrativeChapterMixin, NarrativeStoryMixin
 from novelinsights.services.ai.prompts.base import PromptBase, PromptRequest, PromptTemplateBase
 from novelinsights.types import (
     Provider,
@@ -12,10 +12,7 @@ from novelinsights.types import (
 from novelinsights.utils.token import TokenEstimator
 
 @dataclass
-class SummarizeChapterTemplate(NarrativeExtractionMixin, PromptTemplateBase):
-    # Chapter data
-    chapter_title: str # Can just be the chapter number
-    chapter_content: str # REQUIRED: preferred format: markdown
+class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
@@ -23,9 +20,6 @@ class SummarizeChapterTemplate(NarrativeExtractionMixin, PromptTemplateBase):
     
     # Summaries of related entities
     related_entities: Optional[list[str]] = None
-    
-    def has_chapter_data(self) -> bool:
-        return bool(self.chapter_title and self.chapter_content)
     
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
@@ -112,9 +106,12 @@ class SummarizeChapterPrompt(PromptBase):
     ) -> None:
         """Initialize the prompt"""
         if model_config is None:
+            # deepseek r1 distill llama 70B should be good enough
+            # deepseek r1 seems to be the best
+            # o1-mini seems to be good as well, not the best, I think thinking models will be best for this task
+            # Claude 3.5 Sonnet is good for just a summary of the events of the chapter, but maybe with some extra prompting, the literary elements can also be extracted well
             model_config = ModelConfig(
-                provider=Provider.ANTHROPIC, # deepseek r1 distill llama 70B should be good enough, deepseek r1 seems to be the best, o1-mini seems to be good as well, not the best, I think thinking models will be best for this task
-                # Claude 3.5 Sonnet is good for just a summary of the events of the chapter - with some extra prompting, the literary elements can also be extracted well
+                provider=Provider.ANTHROPIC,
                 model="claude-3-5-sonnet-20240620",
                 temperature=1.0,
             )

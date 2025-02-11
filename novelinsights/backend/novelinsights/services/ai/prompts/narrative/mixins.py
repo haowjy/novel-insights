@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Optional
 
 @dataclass
-class NarrativeExtractionMixin:
+class NarrativeStoryMixin:
     """Mixin for prompts that extract narrative information from a book
     Includes story metadata from the book
     """
@@ -28,4 +28,17 @@ class NarrativeExtractionMixin:
             "# Overarching Goal\n"
             "Extract and structure knowledge from the narrative while maintaining proper story progression context and preventing spoilers."
         )
+
+@dataclass
+class NarrativeChapterMixin:
+    """Mixin for prompts that extract narrative information from a book
+    Includes chapter metadata from the book
+    """
+    
+    chapter_title: str
+    chapter_content: str
+    
+    def has_chapter_data(self) -> bool:
+        return bool(self.chapter_title and self.chapter_content)
+    
     

@@ -1,34 +1,23 @@
-from typing import List, Dict, Any, Optional
+from typing import Any, Optional
 from dataclasses import dataclass
 
-from sympy import Equality
-
-from novelinsights.services.ai.prompts.narrative.mixins import NarrativeExtractionMixin
+from novelinsights.core.config import ModelConfig
+from novelinsights.services.ai.prompts.narrative.mixins import NarrativeChapterMixin, NarrativeStoryMixin
 from novelinsights.services.ai.prompts.base import PromptBase, PromptTemplateBase
 from novelinsights.types.knowledge import EntityType
+from novelinsights.types.services.prompt import PromptType
+from novelinsights.types.services.provider import Provider
 
 @dataclass
-class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
-    # Chapter data
-    chapter_title: str # Can just be the chapter number
-    chapter_content: str # REQUIRED: preferred format: markdown
+class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
     last_n_chapters_summary: Optional[str] = None # concatenate the summaries of the last n chapters
     
-    # Summaries of related entities
-    # related_entities: Optional[list[str]] = None
-    
-    def has_chapter_data(self) -> bool:
-        return bool(self.chapter_title and self.chapter_content)
-    
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
-    
-    # def has_related_entities(self) -> bool:
-    #     return bool(self.related_entities)
-    
+
     def prompt(self, **kwargs: Any) -> str:
         # update prompt config with kwargs
         self.update(**kwargs)
@@ -36,7 +25,6 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         has_story_metadata = self.has_story_metadata()
         has_chapter_data = self.has_chapter_data()
         has_story_summaries = self.has_story_summaries()
-        # has_related_entities = self.has_related_entities()
         
         p = (
             f"{self._persona()}\n\n" +
@@ -58,12 +46,6 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
                 (f"## Story Summary (Known to Reader)\n{self.story_summary}\n" if self.story_summary else "") +
                 (f"## Summary of Recent Chapters\n{self.last_n_chapters_summary}\n" if self.last_n_chapters_summary else "")
             )
-        
-        # if has_related_entities:
-        #     p += (
-        #         "\n# Related Entities\n" +
-        #         (f"{'\n'.join(self.related_entities)}\n" if self.related_entities else "")
-        #     )
         
         if has_chapter_data:
             p += (
@@ -110,16 +92,18 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         
         p += (
             "\n## Important Notes\n" +
-            "- Sort entities by category, then by order of appearance\n" +
+            "- Make sure only significant entities are included\n" +
             "- Note if an entity's nature or description is unclear or evolving\n" +
             "- Maintain focus on this chapter's content only\n" +
-            "- Please format the entities using JSON to make it easy to parse\n"
+            "- Please format the entities using JSON with ```json to make it easy to parse\n"
         )
         
         p += (
             "\n## Example Output" +
 """
+```json
 {
+    "time_periods": [],
     ...
     "characters": [
         {
@@ -141,9 +125,8 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
         ...
     ],
     ...
-    "arcs": [],
-    ...
 }
+```
 """
         )
         return p
@@ -160,5 +143,44 @@ class FindEntitiesTemplate(NarrativeExtractionMixin, PromptTemplateBase):
             chapter_content="{{chapter_content}}",
             story_summary="{{story_summary}}",
             last_n_chapters_summary="{{last_n_chapters_summary}}",
-            # related_entities=["{{related_entity1}}", "{{related_entity2}}", "{{related_entity3}}"],
         )
+
+
+class FindEntitiesPrompt(PromptBase):
+    """Prompt for reading a chapter of a book"""
+    
+    def __init__(
+        self,
+        model_config: ModelConfig | None = None,
+        prompt_template: FindEntitiesTemplate | None = None,
+    ) -> None:
+        """Initialize the prompt"""
+        if model_config is None:
+            # gemini-2.0-flash-001 seems to be good for this task
+            # gemini-2.0-flash-lite-preview-02-05 seems to also be good for this task
+            # nice b/c its super cheap
+            # interestingly, thinking models are NOT good for this task
+            model_config = ModelConfig(
+                provider=Provider.GEMINI,
+                model="gemini-2.0-flash-001",
+                temperature=1.0,
+            )
+
+        super().__init__(model_config, prompt_template)
+    
+    @property
+    def name(self) -> str:
+        return "Find Entities"
+    
+    @property
+    def version(self) -> int:
+        return 1
+    
+    @property
+    def type(self) -> PromptType:
+        return PromptType.FIND_ENTITIES
+    
+    @property
+    def description(self) -> str:
+        return "Extract all narratively significant entities from a chapter of a book"
+    
