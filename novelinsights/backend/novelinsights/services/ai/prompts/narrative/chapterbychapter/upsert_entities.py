@@ -4,21 +4,30 @@ from dataclasses import dataclass
 from novelinsights.core.config import ModelConfig
 from novelinsights.services.ai.prompts.narrative.mixins import NarrativeChapterMixin, NarrativeStoryMixin
 from novelinsights.services.ai.prompts.base import PromptBase, PromptTemplateBase
-from novelinsights.types.knowledge import EntityType
 from novelinsights.types.services.prompt import PromptType
 from novelinsights.types.services.provider import Provider
 
 @dataclass
-class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
+class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
+    
+    # Entities to create or update with
+    new_entities: list[str]
+    update_with_entities: list[str]
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
     last_n_chapters_summary: Optional[str] = None # concatenate the summaries of the last n chapters
     
+    # Summaries of related entities to update
+    related_entities: Optional[list[str]] = None
+    
     is_structured_output: bool = True # whether to use structured output offered by openAI or gemini so far 2025-10-02
     
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
+    
+    def has_related_entities(self) -> bool:
+        return bool(self.related_entities)
 
     def prompt(self, **kwargs: Any) -> str:
         # update prompt config with kwargs
@@ -27,11 +36,12 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
         has_story_metadata = self.has_story_metadata()
         has_chapter_data = self.has_chapter_data()
         has_story_summaries = self.has_story_summaries()
+        has_related_entities = self.has_related_entities()
         
         p = (
             f"{self._persona()}\n\n" +
             "# Overarching Goal\n" +
-            "Extract all narratively significant entities from the chapter, identifying the building blocks that will be crucial for understanding the story's knowledge structure. Focus on capturing both explicit and implicit elements that carry meaning or importance in the narrative.\n\n"
+            "Update or create the entities in the chapter, focusing on elements that have narrative importance or impact on the story.\n\n"
         )
         if has_story_metadata:
             p += (
@@ -56,20 +66,37 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
                 (f"## Chapter Content\n---\n{self.chapter_content}\n---\n" if self.chapter_content else "")
             )
             
+        if has_related_entities:
+            p += (
+                "\n# Related Entities\n" +
+                (f"{'\n'.join(self.related_entities)}\n" if self.related_entities else "")
+            )
+        
         p += (
             "\n# Purpose\n" +
-            "Extract all significant entities mentioned in this chapter, focusing on elements that have narrative importance or impact on the story.\n"
+            "Update or create the entities in the chapter, as well as the relationships between them.\n"
         )
         
         p += (
             "\n# Guidelines\n\n" +
-            "## Entity Categories\n" +
-            "Extract important entities for the following categories:\n"
+            "## Entities\n" +
+            "Update or create the entities for the following entities:\n"
         )
         
-        for i, entity in enumerate(EntityType):
+        p += (
+            "### New Entities\n"
+        )
+        for entity in self.new_entities:
             p += (
-                f"{i+1}. {entity.value}s: {entity.description}\n"
+                f"{entity}\n"
+            )
+        
+        p += (
+            "### Update with Entities\n"
+        )
+        for entity in self.update_with_entities:
+            p += (
+                f"{entity}\n"
             )
         
         p += (
@@ -78,30 +105,30 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
             "- Main Identifier of the entity that will be used to reference the entity and you believe is unique\n" +
             "- Aliases (all names and other identifiers for the entity)\n" +
             "- Description of the entity (what the entity is, what it does, etc)\n" +
-            "- Narrative Significance (why this entity matters in the context of this chapter)\n" +
-            "- Significance Level to the chapter's plot (central - crucial to everything; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important to current events; peripheral - mentioned but barely relevant)\n" +
-            "- other related entities mentioned\n"
+            "- Detailed description of the entity\n" +
+            "- Detailed summary of the entity's entire history in the story\n" +
+            "- Narrative Significance (why this entity matters)\n" +
+            "- Significance Level to the chapter's plot (central - crucial to the entire story; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important at all)\n" +
+            "- Relationships to other entities\n"
+            "  - For each relationship, a description of the relationship's current state"
         )
         
         p += (
-            "\n## Extraction Rules\n" +
-            "- Extract only entities with clear narrative significance that will be important across the entire story\n" +
+            "\n## Rules\n" +
             "- Make sure to combine entities that reference the same entity (describe the entity in more detail if needed)\n" +
-            "- Include both explicitly named and strongly implied entities\n" +
             "- Note uncertainty when entity details are ambiguous\n" +
-            "- Focus on quality over quantity - only include truly significant entities\n"
+            "- Focus on quality over quantity - only include truly significant entities, skip entities you find insignificant to the big picture\n"
         )
         
         p += (
             "\n## Important Notes\n" +
-            "- Make sure only significant entities are included\n" +
-            "- Note if an entity's nature or description is unclear or evolving\n" +
             ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.is_structured_output else "")
         )
         
+        # TODO: add example output
         if not self.is_structured_output:
             p += ("\n## Example Output" +
-"""
+""" 
 ```json
 {
     "time_periods": [],
@@ -132,28 +159,35 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
         return p
     
     @classmethod
-    def template(cls) -> 'FindEntitiesTemplate':
+    def template(cls) -> 'UpsertEntitiesTemplate':
         # Return a new instance of the prompt template with placeholder values.
         return cls(
             story_title="{{story_title}}",
             genres=["{{genre1}}", "{{genre2}}", "{{genre3}}"],
             additional_tags=["{{additional_tag1}}", "{{additional_tag2}}", "{{additional_tag3}}"],
             story_description="{{story_description}}",
+            
             chapter_title="{{chapter_title}}",
             chapter_content="{{chapter_content}}",
+            
             story_summary="{{story_summary}}",
             last_n_chapters_summary="{{last_n_chapters_summary}}",
+            
+            new_entities=["{{new_entity1}}", "{{new_entity2}}", "{{new_entity3}}"],
+            update_with_entities=["{{update_with_entity1}}", "{{update_with_entity2}}", "{{update_with_entity3}}"],
+            related_entities=["{{related_entity1}}", "{{related_entity2}}", "{{related_entity3}}"],
+            
             is_structured_output=False,
         )
 
 
-class FindEntitiesPrompt(PromptBase):
-    """Prompt for reading a chapter of a book"""
+class UpsertEntitiesPrompt(PromptBase):
+    """Prompt for updating or creating the entities that appear in a chapter of a book"""
     
     def __init__(
         self,
         model_config: ModelConfig | None = None,
-        prompt_template: FindEntitiesTemplate | None = None,
+        prompt_template: UpsertEntitiesTemplate | None = None,
     ) -> None:
         """Initialize the prompt"""
         if model_config is None:
@@ -168,13 +202,13 @@ class FindEntitiesPrompt(PromptBase):
             )
 
         super().__init__(
-            prompt_template or FindEntitiesTemplate.template(),
+            prompt_template or UpsertEntitiesTemplate.template(),
             model_config,
         )
     
     @property
     def name(self) -> str:
-        return "Find Entities"
+        return "Upsert Entities"
     
     @property
     def version(self) -> int:
@@ -182,8 +216,8 @@ class FindEntitiesPrompt(PromptBase):
     
     @property
     def type(self) -> PromptType:
-        return PromptType.FIND_ENTITIES
+        return PromptType.UPSERT_ENTITIES
     
     @property
     def description(self) -> str:
-        return "Extract all narratively significant entities from a chapter of a book"
+        return "Update or create the entities in a chapter of a book"

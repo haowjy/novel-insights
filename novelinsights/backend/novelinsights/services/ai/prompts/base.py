@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Mapping
+from typing import Any
 from abc import ABC, abstractmethod
 from packaging.version import Version
 
@@ -49,11 +49,11 @@ class PromptBase(ABC):
     
     def __init__(
         self, 
+        prompt_template: PromptTemplateBase,
         model_config: ModelConfig | None = None,
-        prompt_template: PromptTemplateBase | None = None,
     ) -> None:
+        self._prompt_template: PromptTemplateBase = prompt_template
         self._model_config: ModelConfig = model_config or ModelConfig()
-        self._prompt_template: PromptTemplateBase = prompt_template or DefaultPromptTemplate()
         self._last_rendered: str = ""
     
     @property

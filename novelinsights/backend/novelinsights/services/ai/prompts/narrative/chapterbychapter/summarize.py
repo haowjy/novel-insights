@@ -1,15 +1,14 @@
 from dataclasses import dataclass
-from typing import Any, Optional, NotRequired
+from typing import Any, Optional
 from packaging.version import Version
 
 from novelinsights.core.config import ModelConfig
 from novelinsights.services.ai.prompts.narrative.mixins import NarrativeChapterMixin, NarrativeStoryMixin
-from novelinsights.services.ai.prompts.base import PromptBase, PromptRequest, PromptTemplateBase
+from novelinsights.services.ai.prompts.base import PromptBase, PromptTemplateBase
 from novelinsights.types import (
     Provider,
     PromptType,
 )
-from novelinsights.utils.token import TokenEstimator
 
 @dataclass
 class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
@@ -115,8 +114,11 @@ class SummarizeChapterPrompt(PromptBase):
                 model="claude-3-5-sonnet-20240620",
                 temperature=1.0,
             )
-
-        super().__init__(model_config, prompt_template)
+            
+        super().__init__(
+            prompt_template or SummarizeChapterTemplate.template(),
+            model_config,
+        )
     
     @property
     def name(self) -> str:
@@ -133,4 +135,3 @@ class SummarizeChapterPrompt(PromptBase):
     @property
     def description(self) -> str:
         return "Summarize a chapter of a book"
-    
