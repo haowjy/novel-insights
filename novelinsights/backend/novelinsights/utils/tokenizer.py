@@ -30,7 +30,7 @@ def simple_token_estimator(text: str) -> int:
     tokens_count_char_est = char_count / 4.0
     return int((tokens_count_word_est + tokens_count_char_est) / 2)
 
-def get_estimator(tokenizer: str | Tokenizer = 'simple') -> Callable[[str], int]:
+def get_estimator(tokenizer: 'str | Tokenizer' = 'simple') -> Callable[[str], int]:
     """estimate the number of tokens in a text.
 
     Args:
@@ -58,7 +58,7 @@ def get_estimator(tokenizer: str | Tokenizer = 'simple') -> Callable[[str], int]
 
 
 class TokenEstimator:
-    def __init__(self, tokenizer: str | Tokenizer = 'simple'):
+    def __init__(self, tokenizer: 'str | Tokenizer' = 'simple'):
         self.tokenizer = get_estimator(tokenizer)
     
     def estimate(self, text: str) -> int:

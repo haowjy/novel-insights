@@ -70,12 +70,11 @@ class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, Promp
         
         p += (
             "\n# Instructions\n"
-            "- Generate a comprehensive but concise summary that captures key narrative/plot developments, and major literary elements (e.g. foreshadowing, symbolism, allusions, etc.) from the provided story excerpt woven into the summary\n"
+            "- Generate a comprehensive summary that captures key narrative/plot developments, and major literary elements (e.g. foreshadowing, symbolism, allusions, etc.) from the provided chapter woven into the summary\n"
             "- The summary should reflect only information available to the reader at this point in the story, or information that is common knowledge of through literary allusions/pop culture references\n"
-            "- Maintain clarity and conciseness; let's try to be precise about this summary\n"
             "- Separate the summary scene by scene\n"
             "- Please format the summary using Markdown to provide a clear and readable summary\n"
-            f"- Start the summary with '# Summary of {self.chapter_title}'\n"
+            f"- Start the summary with '# Summary of {self.chapter_title}' and end with '<|ENDOFSUMMARY|>'"
         )
         
         return p

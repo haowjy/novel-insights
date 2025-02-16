@@ -12,22 +12,21 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
     
     # Entities to create or update with
     new_entities: list[str]
-    update_with_entities: list[str]
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
     last_n_chapters_summary: Optional[str] = None # concatenate the summaries of the last n chapters
     
-    # Summaries of related entities to update
-    related_entities: Optional[list[str]] = None
+    # Summaries of existing entities to update
+    existing_entities: Optional[list[str]] = None
     
     is_structured_output: bool = True # whether to use structured output offered by openAI or gemini so far 2025-10-02
     
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
     
-    def has_related_entities(self) -> bool:
-        return bool(self.related_entities)
+    def has_existing_entities(self) -> bool:
+        return bool(self.existing_entities)
 
     def prompt(self, **kwargs: Any) -> str:
         # update prompt config with kwargs
@@ -36,7 +35,7 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
         has_story_metadata = self.has_story_metadata()
         has_chapter_data = self.has_chapter_data()
         has_story_summaries = self.has_story_summaries()
-        has_related_entities = self.has_related_entities()
+        has_existing_entities = self.has_existing_entities()
         
         p = (
             f"{self._persona()}\n\n" +
@@ -66,10 +65,10 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
                 (f"## Chapter Content\n---\n{self.chapter_content}\n---\n" if self.chapter_content else "")
             )
             
-        if has_related_entities:
+        if has_existing_entities:
             p += (
-                "\n# Related Entities\n" +
-                (f"{'\n'.join(self.related_entities)}\n" if self.related_entities else "")
+                "\n# Existing Entities\n" +
+                (f"{'\n'.join(self.existing_entities)}\n" if self.existing_entities else "")
             )
         
         p += (
@@ -84,7 +83,7 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
         )
         
         p += (
-            "### New Entities\n"
+            "### Extracted Entites to Create or Update\n"
         )
         for entity in self.new_entities:
             p += (
@@ -92,36 +91,30 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
             )
         
         p += (
-            "### Update with Entities\n"
-        )
-        for entity in self.update_with_entities:
-            p += (
-                f"{entity}\n"
-            )
-        
-        p += (
-            "\n## Format\n" +
+            f"\n## Format\n" +
             "For each entity, include the following fields:\n" +
-            "- Main Identifier of the entity that will be used to reference the entity and you believe is unique\n" +
+            "- Main Identifier of the entity that will be used to reference the entity and you believe is unique. You may change the identifier if you think it is no longer unique.\n" +
             "- Aliases (all names and other identifiers for the entity)\n" +
-            "- Description of the entity (what the entity is, what it does, etc)\n" +
             "- Detailed description of the entity\n" +
-            "- Detailed summary of the entity's entire history in the story\n" +
+            "- Knowledge/facts about the entity (explicit - directly stated in text, implicit - inferred from the text, situational - temporary/contextual information, foundational - core/persistent information)\n" +
+            "- Detailed chronology of important history of the entity\n" +
             "- Narrative Significance (why this entity matters)\n" +
-            "- Significance Level to the chapter's plot (central - crucial to the entire story; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important at all)\n" +
-            "- Relationships to other entities\n"
-            "  - For each relationship, a description of the relationship's current state"
+            "- Significance Level to the chapter's plot (central; major; supporting; minor; background)\n" +
+            "- Relationships to other entities\n" +
+            "\n" +
+            "For each relationship, include the following fields:\n" +
+            "  - Source Entity\n" +
+            "  - Target Entity\n" +
+            "  - Relationship Type\n" +
+            "  - Relationship Direction\n" +
+            "  - Description of the relationship's current state\n"
         )
         
         p += (
             "\n## Rules\n" +
-            "- Make sure to combine entities that reference the same entity (describe the entity in more detail if needed)\n" +
+            "- Make sure to combine entities that reference the same entity (describe the entity in more detail and update the identifier if needed)\n" +
             "- Note uncertainty when entity details are ambiguous\n" +
-            "- Focus on quality over quantity - only include truly significant entities, skip entities you find insignificant to the big picture\n"
-        )
-        
-        p += (
-            "\n## Important Notes\n" +
+            "- Ensure as much information as possible is included in the descriptions and history for each entity\n" +
             ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.is_structured_output else "")
         )
         
@@ -131,28 +124,50 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
 """ 
 ```json
 {
-    "time_periods": [],
-    ...
-    "characters": [
+    "entities": [
         {
             "identifier": "John Doe",
             "aliases": ["John", "Doe", "JD", "Protagonist"],
             "description": "A young man with a kind heart and a strong sense of justice.",
+            "facts": {
+                "explicit": [
+                    "the protagonist of the story, and his journey is central to the plot.",
+                    "swordsman",
+                    ...
+                ],
+                "implicit": [
+                    "a good person who always helps others.",
+                    ...
+                ],
+                "situational": [
+                    "on a quest to save the world from a great evil.",
+                    ...
+                ],
+                "foundational": [
+                    "has a strong sense of justice.",
+                    ...
+                ],
+            },
+            "history": [
+                "trained in the art of swordsmanship since childhood",
+                ...
+            ],
             "narrative_significance": "John Doe is the protagonist of the story, and his journey is central to the plot.",
             "significance_level": "central",
             "related_entities": ["Jane Smith", "Bob Johnson"]
         },
-        {
-            "identifier": "John Doe's Dog",
-            "aliases": [],
-            "description": "A loyal and friendly dog who accompanies John Doe on his journey.",
-            "narrative_significance": "The dog is a companion to John Doe and provides emotional support throughout the story.",
-            "significance_level": "supporting",
-            "related_entities": ["John Doe"]
-        },
         ...
     ],
-    ...
+    "relationships": [
+        {
+            "source_entity": "John Doe",
+            "target_entity": "Jane Smith",
+            "relationship_type": "friend",
+            "relationship_direction": "bidirectional",
+            "description": "John and Jane are good friends who support each other through thick and thin."
+        },
+        ...
+    ]
 }
 ```
 """)
@@ -174,8 +189,7 @@ class UpsertEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptT
             last_n_chapters_summary="{{last_n_chapters_summary}}",
             
             new_entities=["{{new_entity1}}", "{{new_entity2}}", "{{new_entity3}}"],
-            update_with_entities=["{{update_with_entity1}}", "{{update_with_entity2}}", "{{update_with_entity3}}"],
-            related_entities=["{{related_entity1}}", "{{related_entity2}}", "{{related_entity3}}"],
+            existing_entities=["{{existing_entity1}}", "{{existing_entity2}}", "{{existing_entity3}}"],
             
             is_structured_output=False,
         )

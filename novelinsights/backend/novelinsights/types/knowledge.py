@@ -17,7 +17,7 @@ class EntityType(DescribedEnum):
     
     LOCATION = ("location", "Significant places or spaces, (including unnamed locations)")
     ITEM = ("item", "Significant physical or abstract objects (e.g. weapons, artifacts, technologies)")
-    CONCEPT = ("concept", "Significant ideas, systems, powers, theories")
+    CONCEPT = ("concept", "Significant ideas, systems, powers, theories introduced in the work")
     CULTURE = ("culture", "Significant societal patterns/practices")
     
     # Narrative

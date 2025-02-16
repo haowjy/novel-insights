@@ -5,7 +5,7 @@ from packaging.version import Version
 
 from novelinsights.core.config import ModelConfig
 from novelinsights.types.services.prompt import PromptType
-from novelinsights.utils.token import TokenEstimator
+from novelinsights.utils.tokenizer import TokenEstimator
 
 @dataclass
 class PromptRequest:
