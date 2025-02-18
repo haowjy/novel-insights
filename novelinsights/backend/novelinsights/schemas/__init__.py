@@ -30,6 +30,10 @@ from novelinsights.schemas.presentation.article import (
     ArticleSnapshotBase, ArticleSnapshot, ArticleSnapshotCreate, ArticleSnapshotUpdate,
 )
 
+from novelinsights.schemas.prompt_responses.narrative.chapterbychapter.find_entities import (
+    FindEntitiesOutputSchema,
+)
+
 __all__ = [
     # Base schemas
     "CoreBase",
@@ -98,4 +102,7 @@ __all__ = [
     "ArticleSnapshot",
     "ArticleSnapshotCreate",
     "ArticleSnapshotUpdate",
+    
+    # Prompt Responses
+    "FindEntitiesOutputSchema",
 ]

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 from typing import Any, Optional
 from packaging.version import Version
 
@@ -11,7 +11,7 @@ from novelinsights.types import (
 )
 
 @dataclass
-class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
+class SummarizeChapterTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeChapterMixin):
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
@@ -72,9 +72,9 @@ class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, Promp
             "\n# Instructions\n"
             "- Generate a comprehensive summary that captures key narrative/plot developments, and major literary elements (e.g. foreshadowing, symbolism, allusions, etc.) from the provided chapter woven into the summary\n"
             "- The summary should reflect only information available to the reader at this point in the story, or information that is common knowledge of through literary allusions/pop culture references\n"
-            "- Separate the summary scene by scene\n"
+            "- Separate the summary scene by scene and weave in literary elements\n"
             "- Please format the summary using Markdown to provide a clear and readable summary\n"
-            f"- Start the summary with '# Summary of {self.chapter_title}' and end with '<|ENDOFSUMMARY|>'"
+            f"- Start the summary with '<|STARTOFSUMMARY|># Summary of {self.chapter_title}' and end with '<|ENDOFSUMMARY|>'"
         )
         
         return p
@@ -92,6 +92,7 @@ class SummarizeChapterTemplate(NarrativeStoryMixin, NarrativeChapterMixin, Promp
             story_summary="{{story_summary}}",
             last_n_chapters_summary="{{last_n_chapters_summary}}",
             related_entities=["{{related_entity1}}", "{{related_entity2}}", "{{related_entity3}}"],
+            structured_output_schema=None,
         )
 
 class SummarizeChapterPrompt(PromptBase):
@@ -103,20 +104,24 @@ class SummarizeChapterPrompt(PromptBase):
         prompt_template: SummarizeChapterTemplate | None = None,
     ) -> None:
         """Initialize the prompt"""
-        if model_config is None:
-            # deepseek r1 distill llama 70B should be good enough
-            # deepseek r1 seems to be the best
-            # o1-mini seems to be good as well, not the best, I think thinking models will be best for this task
-            # Claude 3.5 Sonnet is good for just a summary of the events of the chapter, but maybe with some extra prompting, the literary elements can also be extracted well
-            model_config = ModelConfig(
+        
+        # deepseek r1 distill llama 70B should be good enough
+        # deepseek r1 seems to be the best
+        # o1-mini seems to be good as well, not the best, I think thinking models will be best for this task
+        # Claude 3.5 Sonnet is good for just a summary of the events of the chapter, but maybe with some extra prompting, the literary elements can also be extracted well
+        cur_model_config = ModelConfig(
                 provider=Provider.ANTHROPIC,
-                model="claude-3-5-sonnet-20240620",
-                temperature=1.0,
+                model="claude-3-5-sonnet-20241022",
+                temperature=0.8,
+                max_tokens=8192,
             )
+        
+        if model_config is not None:
+            cur_model_config = replace(cur_model_config, **asdict(model_config))
             
         super().__init__(
             prompt_template or SummarizeChapterTemplate.template(),
-            model_config,
+            cur_model_config,
         )
     
     @property

@@ -1,0 +1,341 @@
+{
+  "response": {
+    "entities": [
+      {
+        "detailed_description": "The main character, a reincarnated Pokemon fan who finds herself in the body of Dr. Fuji's deceased daughter, Amber, during the events surrounding Mewtwo's creation. She retains memories of her past life and knowledge of the Pokemon world, causing internal conflict.",
+        "narrative_significance": "The protagonist whose actions and decisions will shape the story, providing a unique perspective on the Pokemon world due to her past life knowledge.",
+        "significance_level": "central",
+        "entity_type": "character",
+        "identifier": "AlexaTheGreat/Amber",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Was a Pokemon fan in her previous life.",
+            "Reincarnated into the body of Amber, Dr. Fuji's daughter.",
+            "Retains memories of her past life.",
+            "Has knowledge of the Pokemon world from the games.",
+            "Finds herself in the Pokemon Mansion during Mewtwo's escape.",
+            "Is aware of Dr. Fuji's identity."
+          ],
+          "implicit": [
+            "Struggles with the implications of being in a new body.",
+            "Feels a sense of responsibility towards Dr. Fuji, stemming from the connection to his deceased daughter.",
+            "Prioritizes survival due to knowledge about Mewtwo."
+          ],
+          "situational": [
+            "Currently located in the Pokemon Mansion.",
+            "Is being protected by Dr. Fuji.",
+            "Has witnessed Mewtwo's escape and destruction.",
+            "Is concerned about Dr. Fuji's injuries.",
+            "Is in the body of a young girl."
+          ],
+          "foundational": [
+            "Knowledgeable about Pokemon games and lore.",
+            "Experiences a clash between her past life and current reality."
+          ]
+        },
+        "history": [
+          "Died in her original world after being hit by a truck while playing Pokemon Go.",
+          "Reincarnated into the body of Amber, Dr. Fuji's deceased daughter.",
+          "Awakened in a tank, witnessing Mewtwo's escape."
+        ],
+        "aliases": [
+          "AlexaTheGreat",
+          "Amber",
+          "I",
+          "MC"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "Mewtwo",
+          "Amber (clone)"
+        ]
+      },
+      {
+        "detailed_description": "A scientist working at the Pokemon Mansion, driven by grief and a desire to revive his deceased daughter, Amber. Involved in cloning and genetic engineering, leading to the creation of Mewtwo and a clone of his daughter.",
+        "narrative_significance": "A key figure whose scientific endeavors and personal motivations drive the plot, creating moral and ethical conflicts within the story.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Dr. Fuji",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Middle-aged man.",
+            "Works in an underground lab in the Pokemon Mansion.",
+            "Is the father of Amber.",
+            "Was holding Amber when she awoke.",
+            "Showed immense relief and emotion upon Amber's awakening.",
+            "Is injured by falling debris during Mewtwo's escape.",
+            "Desires to fix their family and life.",
+            "Is involved in cloning, genetics, and creation of Mewtwo."
+          ],
+          "implicit": [
+            "His grief has led him down a morally questionable path.",
+            "He prioritizes Amber's safety above all else.",
+            "May be in denial about the situation."
+          ],
+          "situational": [
+            "Currently in the Pokemon Mansion.",
+            "Is injured and trying to escape with Amber.",
+            "Is aware of Mewtwo's power and destructive potential.",
+            "Is desperate to rebuild his family."
+          ],
+          "foundational": [
+            "Driven by the loss of his daughter.",
+            "Possesses advanced scientific knowledge in cloning and genetics."
+          ]
+        },
+        "history": [
+          "Lost his daughter, Amber.",
+          "Engaged in cloning experiments in an attempt to revive her.",
+          "Oversaw the creation of Mewtwo.",
+          "Was present during Mewtwo's escape and the resulting destruction.",
+          "Is now trying to escape with the revived Amber."
+        ],
+        "aliases": [
+          "Dr. Fuji"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber",
+          "Mewtwo",
+          "Amber (clone)",
+          "Pokemon Mansion"
+        ]
+      },
+      {
+        "detailed_description": "A genetically engineered Pokemon created in the Pokemon Mansion. It possesses immense psychic powers and is capable of causing widespread destruction. Its escape throws the facility into chaos.",
+        "narrative_significance": "A force of nature and a symbol of scientific hubris, posing a significant threat and driving the plot forward through its actions.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Mewtwo",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Genetically engineered Pokemon.",
+            "Possesses immense psychic powers.",
+            "Breaks free from its container.",
+            "Causes significant damage to the Pokemon Mansion during its escape.",
+            "Engages in combat with a security guard's Arcanine.",
+            "Escapes through the ceiling of the lab.",
+            "Demonstrates recognition (or memory) upon seeing Amber."
+          ],
+          "implicit": [
+            "Its power is unstable and not fully controlled.",
+            "It is a threat to those around it.",
+            "Possibly has a connection to Amber."
+          ],
+          "situational": [
+            "Currently escaping from the Pokemon Mansion.",
+            "Has destroyed part of the lab.",
+            "Is being pursued (presumably)."
+          ],
+          "foundational": [
+            "Exists outside the natural order.",
+            "Considered the world's strongest Pokemon."
+          ]
+        },
+        "history": [
+          "Created through genetic engineering at the Pokemon Mansion.",
+          "Escaped from its containment during the events of the chapter."
+        ],
+        "aliases": [],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber",
+          "Pokemon Mansion"
+        ]
+      },
+      {
+        "detailed_description": "A sprawling complex that serves as a research facility for Pokemon-related experiments. It houses labs, containment chambers, and living quarters. The mansion is thrown into chaos following Mewtwo's escape.",
+        "narrative_significance": "The primary setting for the chapter's events, representing the consequences of unchecked scientific ambition and serving as a dangerous and unstable environment.",
+        "significance_level": "major",
+        "entity_type": "location",
+        "identifier": "Pokemon Mansion",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Located underground.",
+            "Contains laboratories and containment chambers.",
+            "Has reinforced doors and walls.",
+            "Connected to the outside world via hallways.",
+            "Contains living quarters.",
+            "Contains an Enhancement Lab.",
+            "Contains an evolution acceleration chamber.",
+            "Contains tanks of amber fluid."
+          ],
+          "implicit": [
+            "The facility is not entirely safe.",
+            "The experiments conducted there are potentially dangerous.",
+            "The facility is not prepared for Mewtwo's escape."
+          ],
+          "situational": [
+            "Currently in a state of chaos and destruction.",
+            "Experiencing containment breaches and structural failures.",
+            "On fire and in danger of collapsing."
+          ],
+          "foundational": [
+            "A center for scientific research and experimentation.",
+            "A place of secrets and hidden dangers."
+          ]
+        },
+        "history": [
+          "Site of Mewtwo's creation and containment.",
+          "Site of Dr. Fuji's cloning experiments.",
+          "Damaged and partially destroyed during Mewtwo's escape."
+        ],
+        "aliases": [],
+        "related_entities": [
+          "Dr. Fuji",
+          "Mewtwo",
+          "AlexaTheGreat/Amber"
+        ]
+      },
+      {
+        "detailed_description": "The genetically engineered clone of Dr. Fuji's deceased daughter, Amber. She is revived during the events of the chapter, with her body now inhabited by the consciousness of AlexaTheGreat.",
+        "narrative_significance": "Serves as both a plot device (the means by which the protagonist enters the Pokemon world) and a symbol of Dr. Fuji's desperation and moral compromises.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Amber (clone)",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Cloned from Dr. Fuji's deceased daughter.",
+            "Revived during the events of the chapter.",
+            "Her body is now inhabited by AlexaTheGreat's consciousness.",
+            "Was suspended in amber fluid.",
+            "Has delicate, pale, small, and unblemished arms.",
+            "Has a high, young, and distinctly feminine voice."
+          ],
+          "implicit": [
+            "Her existence raises ethical questions about cloning and the nature of life.",
+            "Her body may not be a perfect replica of the original Amber."
+          ],
+          "situational": [
+            "Currently in the Pokemon Mansion.",
+            "Is being protected by Dr. Fuji.",
+            "Is confused and disoriented after being revived.",
+            "Is the target of Dr. Fuji's affection and protection."
+          ],
+          "foundational": [
+            "The result of Dr. Fuji's attempts to revive his daughter.",
+            "A vessel for AlexaTheGreat's consciousness."
+          ]
+        },
+        "history": [
+          "Cloned from Dr. Fuji's deceased daughter.",
+          "Was suspended in amber fluid until being revived.",
+          "Her body is now inhabited by AlexaTheGreat's consciousness."
+        ],
+        "aliases": [],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber",
+          "Mewtwo"
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "description": "Dr. Fuji is the father of Amber (clone).",
+        "source_entity": "Dr. Fuji",
+        "target_entity": "Amber (clone)",
+        "relationship_type": "family",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "AlexaTheGreat/Amber currently inhabits the body of Amber (clone).",
+        "source_entity": "AlexaTheGreat/Amber",
+        "target_entity": "Amber (clone)",
+        "relationship_type": "other",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Dr. Fuji is protective of AlexaTheGreat/Amber, seeing her as his revived daughter.",
+        "source_entity": "Dr. Fuji",
+        "target_entity": "AlexaTheGreat/Amber",
+        "relationship_type": "family",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "AlexaTheGreat/Amber feels a sense of responsibility towards Dr. Fuji.",
+        "source_entity": "AlexaTheGreat/Amber",
+        "target_entity": "Dr. Fuji",
+        "relationship_type": "other",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Dr. Fuji oversaw the creation of Mewtwo.",
+        "source_entity": "Dr. Fuji",
+        "target_entity": "Mewtwo",
+        "relationship_type": "causation",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Mewtwo was created in the Pokemon Mansion.",
+        "source_entity": "Mewtwo",
+        "target_entity": "Pokemon Mansion",
+        "relationship_type": "location",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Dr. Fuji conducts his research in the Pokemon Mansion.",
+        "source_entity": "Dr. Fuji",
+        "target_entity": "Pokemon Mansion",
+        "relationship_type": "location",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "The creation of Mewtwo caused destruction to the Pokemon Mansion.",
+        "source_entity": "Mewtwo",
+        "target_entity": "Pokemon Mansion",
+        "relationship_type": "causation",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "AlexaTheGreat/Amber was revived in the Pokemon Mansion.",
+        "source_entity": "AlexaTheGreat/Amber",
+        "target_entity": "Pokemon Mansion",
+        "relationship_type": "location",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Amber (clone) was created in the Pokemon Mansion.",
+        "source_entity": "Amber (clone)",
+        "target_entity": "Pokemon Mansion",
+        "relationship_type": "location",
+        "relationship_direction": "outbound"
+      },
+      {
+        "description": "Mewtwo briefly recognized AlexaTheGreat/Amber.",
+        "source_entity": "Mewtwo",
+        "target_entity": "AlexaTheGreat/Amber",
+        "relationship_type": "other",
+        "relationship_direction": "bidirectional"
+      },
+      {
+        "description": "Mewtwo was experimented on by Dr. Fuji",
+        "source_entity": "Mewtwo",
+        "target_entity": "Dr. Fuji",
+        "relationship_type": "causation",
+        "relationship_direction": "inbound"
+      }
+    ]
+  },
+  "usage_metadata": {
+    "prompt_tokens": 4066,
+    "completion_tokens": 3165,
+    "total_tokens": 7231
+  },
+  "model_config": {
+    "provider": "google",
+    "model": "gemini-2.0-flash-001",
+    "max_tokens": 8192,
+    "temperature": 0.8,
+    "top_p": null,
+    "top_k": null,
+    "frequency_penalty": null,
+    "presence_penalty": null,
+    "repetition_penalty": null,
+    "stop_sequences": null
+  }
+}

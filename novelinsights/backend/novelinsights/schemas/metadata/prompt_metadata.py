@@ -1,8 +1,7 @@
 from uuid import UUID
 from typing import Optional, Dict, Any
-from pydantic import BaseModel
 
-from novelinsights.services.ai.prompts.types import PromptType
+from novelinsights.types.services.prompt import PromptType
 from novelinsights.schemas.base import CoreBase, BaseConfig
 
 class PromptMetadataBase(CoreBase):

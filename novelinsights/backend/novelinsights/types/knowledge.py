@@ -1,3 +1,4 @@
+from enum import Enum
 from novelinsights.types.base import DescribedEnum
 
 #
@@ -66,3 +67,36 @@ class RelationStatusType(DescribedEnum):
     DECEASED = ("deceased", "One party died")
     HISTORICAL = ("historical", "Past relationship, no longer current")
     UNKNOWN = ("unknown", "Status unclear or not specified")
+
+class EntitySignificanceLevel(str, Enum):
+    CENTRAL = "central"
+    MAJOR = "major"
+    SUPPORTING = "supporting"
+    MINOR = "minor"
+    BACKGROUND = "background"
+    PERIPHERAL = "peripheral"
+    
+    def to_int(self) -> int:
+        return {
+            self.CENTRAL: 5,
+            self.MAJOR: 4,
+            self.SUPPORTING: 3,
+            self.MINOR: 2,
+            self.BACKGROUND: 1,
+            self.PERIPHERAL: 0,
+        }[self]
+    
+    def __gt__(self, other: "EntitySignificanceLevel") -> bool:
+        return self.to_int() > other.to_int()
+    
+    def __ge__(self, other: "EntitySignificanceLevel") -> bool:
+        return self.to_int() >= other.to_int()
+    
+    def __lt__(self, other: "EntitySignificanceLevel") -> bool:
+        return self.to_int() < other.to_int()
+    
+    def __le__(self, other: "EntitySignificanceLevel") -> bool:
+        return self.to_int() <= other.to_int()
+
+    
+    

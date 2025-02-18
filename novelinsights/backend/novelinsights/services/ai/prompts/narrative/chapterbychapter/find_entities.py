@@ -1,7 +1,8 @@
 from typing import Any, Optional
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, replace
 
 from novelinsights.core.config import ModelConfig
+from novelinsights.schemas.prompt_responses.narrative.chapterbychapter.find_entities import FindEntitiesOutputSchema
 from novelinsights.services.ai.prompts.narrative.mixins import NarrativeChapterMixin, NarrativeStoryMixin
 from novelinsights.services.ai.prompts.base import PromptBase, PromptTemplateBase
 from novelinsights.types.knowledge import EntityType
@@ -9,14 +10,12 @@ from novelinsights.types.services.prompt import PromptType
 from novelinsights.types.services.provider import Provider
 
 @dataclass
-class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTemplateBase):
+class FindEntitiesTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeChapterMixin):
     
     # Summaries of the story so far
     story_summary: Optional[str] = None # summary of the entire story so far
     last_n_chapters_summary: Optional[str] = None # concatenate the summaries of the last n chapters
-    
-    is_structured_output: bool = True # whether to use structured output offered by openAI or gemini so far 2025-10-02
-    
+        
     def has_story_summaries(self) -> bool:
         return bool(self.story_summary or self.last_n_chapters_summary)
 
@@ -96,10 +95,10 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
             "\n## Important Notes\n" +
             "- Make sure only significant entities are included\n" +
             "- Note if an entity's nature or description is unclear or evolving\n" +
-            ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.is_structured_output else "")
+            ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.has_structured_out else "")
         )
         
-        if not self.is_structured_output:
+        if not self.has_structured_out:
             p += ("\n## Example Output" +
 """
 ```json
@@ -143,12 +142,12 @@ class FindEntitiesTemplate(NarrativeStoryMixin, NarrativeChapterMixin, PromptTem
             chapter_content="{{chapter_content}}",
             story_summary="{{story_summary}}",
             last_n_chapters_summary="{{last_n_chapters_summary}}",
-            is_structured_output=False,
+            structured_output_schema=None,
         )
 
 
 class FindEntitiesPrompt(PromptBase):
-    """Prompt for reading a chapter of a book"""
+    """Prompt for finding entities in a chapter of a book"""
     
     def __init__(
         self,
@@ -156,20 +155,23 @@ class FindEntitiesPrompt(PromptBase):
         prompt_template: FindEntitiesTemplate | None = None,
     ) -> None:
         """Initialize the prompt"""
-        if model_config is None:
-            # gemini-2.0-flash-001 seems to be good for this task
-            # gemini-2.0-flash-lite-preview-02-05 seems to also be good for this task
-            # nice b/c they are super cheap, plus they have structured output - https://ai.google.dev/gemini-api/docs/structured-output?lang=python
-            # interestingly, thinking models are NOT good for this task
-            model_config = ModelConfig(
-                provider=Provider.GEMINI,
-                model="gemini-2.0-flash-001",
-                temperature=0.8,
-            )
-
+        # gemini-2.0-flash-001 seems to be good for this task
+        # gemini-2.0-flash-lite-preview-02-05 seems to also be good for this task
+        # nice b/c they are super cheap, plus they have structured output - https://ai.google.dev/gemini-api/docs/structured-output?lang=python
+        # interestingly, thinking models are NOT good for this task
+        cur_model_config = ModelConfig(
+            provider=Provider.GOOGLE,
+            max_tokens=8192, # maybe 4096 can be enough?
+            model="gemini-2.0-flash-001",
+            temperature=0.7,
+        )
+        
+        if model_config is not None:
+            cur_model_config = replace(cur_model_config, **asdict(model_config))
+            
         super().__init__(
             prompt_template or FindEntitiesTemplate.template(),
-            model_config,
+            cur_model_config,
         )
     
     @property

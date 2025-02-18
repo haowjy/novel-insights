@@ -1,20 +1,24 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional, Type
 from abc import ABC, abstractmethod
 from packaging.version import Version
+from pydantic import BaseModel
 
 from novelinsights.core.config import ModelConfig
+from novelinsights.services.ai.llmclient import LLMClient, LLMResponse
 from novelinsights.types.services.prompt import PromptType
-from novelinsights.utils.tokenizer import TokenEstimator
 
-@dataclass
-class PromptRequest:
-    prompt: str
-    estimated_tokens: int
+from novelinsights.utils.parser import extract_blocks
 
 @dataclass
 class PromptTemplateBase(ABC):
     """Base class for all prompt templates"""
+    
+    structured_output_schema: Optional[Type[BaseModel]]
+    
+    @property
+    def has_structured_out(self) -> bool:
+        return bool(self.structured_output_schema)
     
     def update(self, **kwargs: Any) -> None:
         """Update the template with given parameters"""
@@ -79,25 +83,26 @@ class PromptBase(ABC):
         """Prompt template"""
         return self._prompt_template.prompt(**kwargs)
     
-    def render(self, **kwargs: Any) -> PromptRequest:
+    def render(self, **kwargs: Any) -> str:
         """Render the prompt with given parameters"""
         # update prompt config with kwargs
         p = self._prompt(**kwargs)
-        pr = PromptRequest(
-            prompt=p,
-            estimated_tokens=TokenEstimator.simple(p),
-        )
-        return pr
+        self._last_rendered = p
+        return p
     
-    def render_example(self) -> PromptRequest:
+    def render_example(self) -> str:
         """Render an example prompt with all placeholder values"""
         p = self._prompt_template.template().prompt()
-        pr = PromptRequest(
-            prompt=p,
-            estimated_tokens=TokenEstimator.simple(p),
-        )
-        
-        return pr
+        return p
+    
+    def generate(self, client: LLMClient, **kwargs: Any) -> LLMResponse:
+        """Generate a simple text response from the LLM using the given client"""
+        return client.generate(self.model_config, self.render(**kwargs))
+    
+    def generate_structured(self, client: LLMClient, **kwargs: Any) -> LLMResponse:
+        """Generate a structured response from the LLM using the given client"""
+        return client.generate_structured(self.model_config, self.render(**kwargs), structured_schema=self.prompt_template.structured_output_schema)
+
     
     #
     # Abstract properties
@@ -126,3 +131,7 @@ class PromptBase(ABC):
     def description(self) -> str:
         """Description of the prompt"""
         return "DO NOT USE THIS PROMPT DIRECTLY. Use it as a base for other prompts."
+    
+    def __repr__(self) -> str:
+        """Representation of the prompt"""
+        return f"{self.__class__.__name__}(name={self.name}, version={self.version}, type={self.type}, has_structured_out={self.prompt_template.has_structured_out()}, description={self.description})"

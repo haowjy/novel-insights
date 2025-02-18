@@ -1,12 +1,180 @@
 {
-    "response": "```json\n{\n  \"characters\": [\n    {\n      \"description\": \"The main character, a Pokemon fan who is reincarnated as a genetically engineered clone.\",\n      \"identifier\": \"Ambertwo (MC)\",\n      \"narrative_significance\": \"The protagonist of the story, whose past life experiences and knowledge of the Pokemon world will likely influence her actions and decisions in this new reality. Her connection to Dr. Fuji and Mewtwo sets the stage for major plot developments.\",\n      \"significance_level\": \"central\",\n      \"aliases\": [\n        \"I\",\n        \"me\",\n        \"my\",\n        \"AlexaTheGreat\"\n      ],\n      \"related_entities\": [\n        \"Dr. Fuji\",\n        \"Mewtwo\"\n      ]\n    },\n    {\n      \"description\": \"A brilliant scientist who is trying to revive his dead daughter through cloning. He is the creator of Ambertwo and Mewtwo.\",\n      \"identifier\": \"Dr. Fuji\",\n      \"narrative_significance\": \"A key figure in the creation of Ambertwo and Mewtwo, his motivations and actions drive the plot forward. His relationship with Ambertwo will be central to the story.\",\n      \"significance_level\": \"major\",\n      \"aliases\": [\n        \"Giant middle-aged man\"\n      ],\n      \"related_entities\": [\n        \"Ambertwo (MC)\",\n        \"Mewtwo\",\n        \"Amber (deceased daughter)\"\n      ]\n    },\n    {\n      \"description\": \"A genetically engineered Pokemon created by Dr. Fuji, who is extremely powerful and unstable.\",\n      \"identifier\": \"Mewtwo\",\n      \"narrative_significance\": \"A central figure in the story, his existence and actions have a profound impact on the plot. His connection to Ambertwo and his escape from the lab are major events.\",\n      \"significance_level\": \"major\",\n      \"aliases\": [],\n      \"related_entities\": [\n        \"Dr. Fuji\",\n        \"Ambertwo (MC)\"\n      ]\n    },\n    {\n      \"description\": \"The player character's Gyarados in the Pokemon game.\",\n      \"identifier\": \"Gyarados (in-game)\",\n      \"narrative_significance\": \"Represents the protagonist's dedication and investment in her past life, highlighting the contrast between the virtual world and the sudden reality of her death and reincarnation.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    },\n    {\n      \"description\": \"A Pokemon trainer who uses Darkrai in the Discord group. \",\n      \"identifier\": \"ProfOaksFavStudent\",\n      \"narrative_significance\": \"A member of the discord group that signals the importance of the Shadow Mewtwo raid event.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    }\n  ],\n  \"locations\": [\n    {\n      \"description\": \"The location where the main character dies in their previous life.\",\n      \"identifier\": \"University Avenue\",\n      \"narrative_significance\": \"The place where the protagonist's life ended, marking the transition to her new existence.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    },\n    {\n      \"description\": \"The facility where Ambertwo is created and Mewtwo is held.\",\n      \"identifier\": \"Underground Lab\",\n      \"narrative_significance\": \"The primary setting for the chapter, it is the place where Ambertwo is reborn and where Mewtwo escapes, setting the stage for future conflicts.\",\n      \"significance_level\": \"major\",\n      \"aliases\": [],\n      \"related_entities\": [\n        \"Dr. Fuji\",\n        \"Ambertwo (MC)\",\n        \"Mewtwo\"\n      ]\n    },\n    {\n      \"description\": \"The above-ground portion of Dr. Fuji's facility, designed to look like a wealthy estate.\",\n      \"identifier\": \"Mansion\",\n      \"narrative_significance\": \"Contrasts the sterile lab environment, suggesting the hidden and deceptive nature of Dr. Fuji's experiments.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": [\n        \"Underground Lab\",\n        \"Dr. Fuji\"\n      ]\n    }\n  ],\n  \"organizations\": [\n    {\n      \"description\": \"An organization dedicated to Pokemon research and experimentation.\",\n      \"identifier\": \"Dr. Fuji's Research Team\",\n      \"narrative_significance\": \"Their work led to the creation of Mewtwo and the revival of Ambertwo, setting the stage for future conflicts.\",\n      \"significance_level\": \"supporting\",\n      \"aliases\": [],\n      \"related_entities\": [\n        \"Dr. Fuji\",\n        \"Mewtwo\",\n        \"Ambertwo (MC)\"\n      ]\n    }\n  ],\n  \"others\": [\n    {\n      \"description\": \"The game that the main character was playing before being hit by a truck.\",\n      \"identifier\": \"Pokemon Emulator Game\",\n      \"narrative_significance\": \"The protagonist's last activity before reincarnation. Sets the stage for her knowledge of the Pokemon world and the ironic nature of her death.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    },\n    {\n      \"description\": \"The main character dies after being hit by a truck, a common trope.\",\n      \"identifier\": \"Truck-kun\",\n      \"narrative_significance\": \"The means by which the protagonist is transported to the Pokemon world.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    },\n    {\n      \"description\": \"The amber fluid in which Ambertwo is suspended.\",\n      \"identifier\": \"Amber Fluid\",\n      \"narrative_significance\": \"The medium in which Ambertwo is reborn, symbolizing her artificial creation and connection to Dr. Fuji's experiments.\",\n      \"significance_level\": \"supporting\",\n      \"aliases\": [],\n      \"related_entities\": [\n        \"Dr. Fuji\",\n        \"Ambertwo (MC)\"\n      ]\n    }\n  ],\n  \"time_periods\": [\n    {\n      \"description\": \"The time period in which the main character dies in their original world.\",\n      \"identifier\": \"March 30, 2024\",\n      \"narrative_significance\": \"The time period in which the main character dies in their original world.\",\n      \"significance_level\": \"minor\",\n      \"aliases\": [],\n      \"related_entities\": []\n    }\n  ]\n}\n```",
-    "model_config": {
-        "model_name": "gemini-2.0-flash-001",
-        "model_provider": "google",
-        "model_temperature": 0.8,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 8192,
-        "response_mime_type": "application/json"
-    }
+  "response": {
+    "entities": [
+      {
+        "description": "The protagonist, a reincarnated Pokemon fan who finds herself in the body of Amber, Dr. Fuji's deceased daughter and a failed clone. She retains her memories and knowledge from her previous life, including her understanding of the Pokemon world.",
+        "narrative_significance": "The main character whose experiences and decisions drive the plot. Her past life as a Pokemon fan and her new identity as Amber are central to the story's premise and conflicts.",
+        "significance_level": "central",
+        "entity_type": "character",
+        "identifier": "AlexaTheGreat/Amber",
+        "aliases": [
+          "AlexaTheGreat"
+        ],
+        "related_entities": [
+          "Gyarados",
+          "Charizard",
+          "Dr. Fuji",
+          "Mewtwo",
+          "Amber (clone)"
+        ]
+      },
+      {
+        "description": "Alexa's level 40 Gyarados in the Pokemon game she was playing before her death. It's a survivor of many battles and holds sentimental value for her.",
+        "narrative_significance": "Represents the protagonist's dedication and skill in her previous life. Its vulnerability in the game at the time of her death is her last thought, highlighting her unfinished business and attachment to her former world.",
+        "significance_level": "minor",
+        "entity_type": "character",
+        "identifier": "Gyarados",
+        "aliases": [
+          "Gyarados"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber",
+          "Pokemon Mansion"
+        ]
+      },
+      {
+        "description": "A scientist who has successfully cloned his deceased daughter, Amber. He is overjoyed at her apparent return to life, but there is a hint of disbelief. He is involved in genetic experiments, including the creation of Mewtwo.",
+        "narrative_significance": "A key figure tied to the protagonist's new identity and the Mewtwo project. His motivations and actions will likely shape the protagonist's journey and the overall conflict.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Dr. Fuji",
+        "aliases": [
+          "Professor Fuji",
+          "Dr. Fuji"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber",
+          "Mewtwo",
+          "Amber (clone)",
+          "Pokemon Mansion",
+          "Arcanine"
+        ]
+      },
+      {
+        "description": "A genetically engineered Pokemon of immense power. It escapes from its containment after being awakened. Its initial reaction is violent, but it hesitates when seeing 'Amber'.",
+        "narrative_significance": "A central figure whose existence and actions trigger the events of the story. Its connection to the protagonist (as Amber's clone) and its immense power make it a major threat and a potential ally.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Mewtwo",
+        "aliases": [
+          "Mewtwo",
+          "Shadow Mewtwo"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber",
+          "Arcanine",
+          "Pokemon Mansion"
+        ]
+      },
+      {
+        "description": "The vehicle that causes the protagonist's death in her original world, initiating her reincarnation into the Pokemon world.",
+        "narrative_significance": "Serves as the catalyst for the entire story, setting the stage for the protagonist's new life and adventures. It's an allusion to the 'isekai' genre trope.",
+        "significance_level": "minor",
+        "entity_type": "other",
+        "identifier": "Truck-kun",
+        "aliases": [
+          "Truck-kun",
+          "truck"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber"
+        ]
+      },
+      {
+        "description": "The location where Dr. Fuji conducts his experiments, including the creation of Mewtwo and the cloning of Amber. It is a high-tech facility hidden within a wealthy estate.",
+        "narrative_significance": "The setting for the protagonist's awakening and the escape of Mewtwo. It represents the hubris of science and the dangerous consequences of tampering with life. It is also the place where Amber was cloned.",
+        "significance_level": "major",
+        "entity_type": "location",
+        "identifier": "Pokemon Mansion",
+        "aliases": [
+          "Pokemon Mansion",
+          "Laboratory",
+          "Underground Lab",
+          "Facility"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "Mewtwo",
+          "AlexaTheGreat/Amber",
+          "Arcanine"
+        ]
+      },
+      {
+        "description": "Dr. Fuji's deceased daughter who he has cloned. The protagonist inhabits this clone body upon reincarnation.",
+        "narrative_significance": "The protagonist's new identity and physical form. Her existence as a clone raises questions about identity, memory, and what it means to be alive. It's also the reason why Dr. Fuji cares for the protagonist.",
+        "significance_level": "major",
+        "entity_type": "character",
+        "identifier": "Amber (clone)",
+        "aliases": [
+          "Amber (clone)",
+          "Amber"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber",
+          "Mewtwo"
+        ]
+      },
+      {
+        "description": "A security guard's Pokemon who attacks Mewtwo with flames.",
+        "narrative_significance": "Represents the attempt to control Mewtwo and the limitations of conventional power against a legendary Pokemon. Showcases the chaos and danger of Mewtwo's escape.",
+        "significance_level": "minor",
+        "entity_type": "character",
+        "identifier": "Arcanine",
+        "aliases": [
+          "Arcanine"
+        ],
+        "related_entities": [
+          "Mewtwo",
+          "Dr. Fuji",
+          "Pokemon Mansion"
+        ]
+      },
+      {
+        "description": "A special in-game event in Pokemon GO that the protagonist was trying to reach before her death.",
+        "narrative_significance": "Serves as the immediate reason for the protagonist's death and transition to the Pokemon world. It highlights her passion for Pokemon and the ironic twist of her dying while pursuing a Pokemon event.",
+        "significance_level": "minor",
+        "entity_type": "event",
+        "identifier": "Shadow Mewtwo Raid",
+        "aliases": [
+          "Shadow Mewtwo Raid"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber"
+        ]
+      },
+      {
+        "description": "A rule modification to Pokemon games, where Pokemon that faint are considered dead and cannot be used anymore.",
+        "narrative_significance": "Highlights the high stakes of the game the protagonist was playing, and her attachment to her Pokemon.",
+        "significance_level": "minor",
+        "entity_type": "concept",
+        "identifier": "perma-death rules",
+        "aliases": [
+          "perma-death rules"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber",
+          "Gyarados"
+        ]
+      }
+    ]
+  },
+  "usage_metadata": {
+    "prompt_tokens": 4032,
+    "completion_tokens": 1527,
+    "total_tokens": 5559
+  },
+  "model_config": {
+    "provider": "google",
+    "model": "gemini-2.0-flash-001",
+    "max_tokens": 8192,
+    "temperature": 0.7,
+    "top_p": null,
+    "top_k": null,
+    "frequency_penalty": null,
+    "presence_penalty": null,
+    "repetition_penalty": null,
+    "stop_sequences": null
+  }
 }
