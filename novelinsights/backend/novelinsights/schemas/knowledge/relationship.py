@@ -2,7 +2,7 @@ from uuid import UUID
 from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, Field
 
-from novelinsights.models.knowledge.relationship import RelationDirectionType, RelationType, RelationStatusType
+from novelinsights.models.knowledge.relationship import RelationCompositionType, RelationType, RelationStatusType
 from novelinsights.schemas.base import CoreBase, TemporalSnapshotBase, BaseConfig
 
 
@@ -40,7 +40,7 @@ class RelationshipBase(CoreBase):
     """Base schema for relationships"""
     source_entity_id: UUID
     target_entity_id: UUID
-    direction: RelationDirectionType
+    direction: RelationCompositionType
     relationship_type: RelationType
     subtype: Optional[str] = None
     additional_types: Optional[List[str]] = None
@@ -61,7 +61,7 @@ class RelationshipUpdate(BaseConfig):
     """Schema for updating a relationship"""
     source_entity_id: Optional[UUID] = None
     target_entity_id: Optional[UUID] = None
-    direction: Optional[RelationDirectionType] = None
+    direction: Optional[RelationCompositionType] = None
     relationship_type: Optional[RelationType] = None
     subtype: Optional[str] = None
     additional_types: Optional[List[str]] = None

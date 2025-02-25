@@ -1,0 +1,214 @@
+{
+  "resp": {
+    "entities": [
+      {
+        "detailed_description": "The main character of the story. Originally a Pokemon fan from another world, she dies and is reincarnated into the body of Amber, Dr. Fuji's deceased daughter, who is implied to be a clone. She retains her memories and knowledge from her previous life, including her understanding of the Pokemon world.",
+        "narrative_significance": "The central character whose perspective drives the story. Her experiences and reactions to the Pokemon world through Amber's body shape the narrative and explore themes of identity, reality, and the consequences of scientific ambition.",
+        "significance_level": "CENTRAL",
+        "entity_type": "CHARACTER",
+        "identifier": "AlexaTheGreat/Amber",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Originally a Pokemon fan from another world",
+            "Reincarnated into the body of Amber",
+            "Retains memories and knowledge from her previous life",
+            "Finds herself in the presence of Dr. Fuji and Mewtwo"
+          ],
+          "implicit": [
+            "Feels a sense of displacement and confusion in her new body",
+            "Recognizes Dr. Fuji and Mewtwo from her knowledge of the Pokemon world",
+            "Initially overwhelmed by the reality of the situation"
+          ],
+          "situational": [
+            "Wakes up in a tank filled with amber fluid",
+            "Is rescued by Dr. Fuji after the tank breaks",
+            "Witnesses Mewtwo's escape and destruction"
+          ],
+          "foundational": [
+            "Pokemon fan",
+            "Reincarnated into Amber's body"
+          ]
+        },
+        "history": [
+          "Died in her original world after being hit by a truck",
+          "Reincarnated into the body of Amber",
+          "Wakes up in a lab where Mewtwo is being contained"
+        ],
+        "aliases": [
+          "AlexaTheGreat",
+          "Amber",
+          "the protagonist"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "Amber",
+          "Mewtwo",
+          "Gyarados"
+        ]
+      },
+      {
+        "detailed_description": "A scientist deeply involved in cloning and genetic experiments, particularly with Mewtwo. He is also the father of Amber, whose body the protagonist now inhabits. He shows great emotion and attachment towards the protagonist, believing her to be his daughter returned to life.",
+        "narrative_significance": "A key figure whose actions and motivations drive the plot. His relationship with the protagonist and his involvement in Mewtwo's creation are central to the story's themes of loss, redemption, and the ethics of scientific advancement.",
+        "significance_level": "CENTRAL",
+        "entity_type": "CHARACTER",
+        "identifier": "Dr. Fuji",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "A scientist involved in cloning and genetic experiments",
+            "Father of Amber",
+            "Shows great emotion and attachment towards the protagonist",
+            "Is seemingly responsible for Mewtwo's creation"
+          ],
+          "implicit": [
+            "Driven by grief and a desire to bring his daughter back to life",
+            "Possibly unethical in his scientific pursuits",
+            "His actions have significant consequences for the world around him"
+          ],
+          "situational": [
+            "Catches the protagonist after she emerges from the tank",
+            "Wraps his lab coat around her",
+            "Escapes the lab with her after Mewtwo's escape",
+            "Injured during Mewtwo's rampage"
+          ],
+          "foundational": [
+            "Scientist",
+            "Father of Amber"
+          ]
+        },
+        "history": [
+          "Lost his daughter, Amber, to an unknown cause",
+          "Dedicated himself to cloning and genetic experiments in an attempt to revive her",
+          "Created Mewtwo, a powerful genetically engineered Pok\u00e9mon",
+          "Is now faced with the consequences of his actions after Mewtwo's escape"
+        ],
+        "aliases": [
+          "Dr. Fuji"
+        ],
+        "related_entities": [
+          "AlexaTheGreat/Amber",
+          "Amber",
+          "Mewtwo"
+        ]
+      },
+      {
+        "detailed_description": "Dr. Fuji's deceased daughter, whose body the protagonist now inhabits. She was seemingly part of a cloning experiment, and her genetic material was used to create the body the protagonist now occupies.",
+        "narrative_significance": "Represents the loss and grief that drive Dr. Fuji's actions. Her existence as a clone raises ethical questions about the nature of life and identity, and her body serves as the vessel for the protagonist's journey.",
+        "significance_level": "MAJOR",
+        "entity_type": "CHARACTER",
+        "identifier": "Amber",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Dr. Fuji's deceased daughter",
+            "Her body is now inhabited by the protagonist",
+            "Part of a cloning experiment"
+          ],
+          "implicit": [
+            "Her death had a profound impact on Dr. Fuji",
+            "The reason of death is unknown",
+            "Her existence raises questions about identity and the soul"
+          ],
+          "situational": [
+            "Her body is being used in the experiment that the protagonist wakes up in"
+          ],
+          "foundational": [
+            "Deceased daughter of Dr. Fuji",
+            "Cloning subject"
+          ]
+        },
+        "history": [
+          "Died at a young age",
+          "Her genetic material was used for cloning experiments by Dr. Fuji",
+          "Her body is now inhabited by the protagonist"
+        ],
+        "aliases": [
+          "Amber",
+          "Dr. Fuji's dead daughter"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber"
+        ]
+      },
+      {
+        "detailed_description": "A genetically engineered Pokemon of immense power, created by Dr. Fuji. It escapes containment and causes destruction in the laboratory.",
+        "narrative_significance": "Represents the dangers of unchecked scientific ambition and the ethical implications of creating life. Its escape and destructive power set the stage for future conflicts and explore themes of freedom, identity, and the relationship between humans and Pok\u00e9mon.",
+        "significance_level": "MAJOR",
+        "entity_type": "CHARACTER",
+        "identifier": "Mewtwo",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Genetically engineered Pokemon",
+            "Created by Dr. Fuji",
+            "Escapes containment",
+            "Causes destruction in the laboratory"
+          ],
+          "implicit": [
+            "Possesses immense psychic power",
+            "Feels conflicted and confused about its existence",
+            "Potentially dangerous and unpredictable"
+          ],
+          "situational": [
+            "Breaks free from its tank",
+            "Battles with Arcanine",
+            "Escapes through the ceiling of the laboratory"
+          ],
+          "foundational": [
+            "Genetically engineered Pokemon"
+          ]
+        },
+        "history": [
+          "Created through genetic engineering by Dr. Fuji",
+          "Contained in a laboratory",
+          "Escapes and wreaks havoc"
+        ],
+        "aliases": [],
+        "related_entities": [
+          "Dr. Fuji",
+          "AlexaTheGreat/Amber"
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "relationship_type": "SOCIAL",
+        "relationship_composition": "BELONGS_TO",
+        "source_entity": "AlexaTheGreat/Amber",
+        "target_entity": "Dr. Fuji",
+        "significance_level": "CENTRAL",
+        "strength": "VERY_STRONG",
+        "current_description": "Dr. Fuji deeply cares for Amber and is overjoyed at her apparent revival. He treats the protagonist, now in Amber's body, with immense affection and protectiveness.",
+        "description": "Dr. Fuji and Amber (now AlexaTheGreat/Amber) share a father-daughter relationship. He is deeply affected by her death and seeks to bring her back through cloning and genetic experiments. Upon the protagonist's reincarnation into Amber's body, he is overjoyed and protective, seeing her as his daughter returned."
+      },
+      {
+        "relationship_type": "ORGANIZATIONAL",
+        "relationship_composition": "DERIVES_FROM",
+        "source_entity": "Mewtwo",
+        "target_entity": "Dr. Fuji",
+        "significance_level": "MAJOR",
+        "strength": "STRONG",
+        "current_description": "Dr. Fuji created Mewtwo through genetic engineering. Mewtwo is now free and has escaped.",
+        "description": "Dr. Fuji and Mewtwo have a creator-creation relationship. Dr. Fuji is responsible for Mewtwo's existence through genetic engineering. The relationship is strained by Mewtwo's imprisonment and subsequent escape."
+      },
+      {
+        "relationship_type": "THEMATIC",
+        "relationship_composition": "TRANSFORMS_INTO",
+        "source_entity": "AlexaTheGreat/Amber",
+        "target_entity": "Amber",
+        "significance_level": "MAJOR",
+        "strength": "VERY_STRONG",
+        "current_description": "The protagonist is now in Amber's body.",
+        "description": "Amber is the original owner of the body that AlexaTheGreat/Amber now inhabits. Amber's death and subsequent cloning are the reasons AlexaTheGreat/Amber exists in the Pokemon world."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 4063,
+    "completion_tokens": 2185,
+    "total_tokens": 6248
+  },
+  "model_config": null
+}

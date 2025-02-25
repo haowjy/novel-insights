@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 
-from novelinsights.types.knowledge import EntitySignificanceLevel, EntityType, RelationDirectionType, RelationType
+from novelinsights.types.knowledge import RelationshipStrength, SignificanceLevel, EntityType, RelationCompositionType, RelationType
 
 class UpsertFact(BaseModel):
     explicit: List[str] = Field(
@@ -19,16 +19,16 @@ class UpsertFact(BaseModel):
 
 class UpsertEntity(BaseModel):
     detailed_description: str = Field(
-        description="detailed description of the entity")
+        description="an extremely detailed summary of the entity (what the entity is, what it does, etc) and its significance to the entire story. Use Markdown formatting to organize this description.")
     
     narrative_significance: str = Field(
-        description="why this entity matters in the story and beyond")
+        description="the narrative significance of the entity across the entire story so far")
     
-    significance_level: EntitySignificanceLevel = Field(
-        description="significance level of the entity to the story and beyond")
+    significance_level: SignificanceLevel = Field(
+        description=f"significance level of the entity across the entire story\n{SignificanceLevel.all_descriptions()}")
     
     entity_type: EntityType = Field(
-        description="type of entity")
+        description=f"type of entity.\n{EntityType.all_descriptions()}")
     
     identifier: str = Field(
         description="main identifier of the entity that will be used to reference the entity and you believe is unique. you may change the identifier if you think it is no longer unique.")
@@ -37,10 +37,10 @@ class UpsertEntity(BaseModel):
         description="old identifier of the entity if you are updating an existing entity")
     
     facts: UpsertFact = Field(
-        description="important facts about the entity")
+        description="facts about the entity that are key to understanding the entity in this story")
     
     history: List[str] = Field(
-        description="detailed chronology of important history of the entity")
+        description="chronology of the most important history of the entity")
 
     aliases: List[str] = Field(
         description="all names and other identifiers for the entity")
@@ -48,22 +48,68 @@ class UpsertEntity(BaseModel):
     related_entities: List[str] = Field(
         description="identifiers of other entities that are related to the entity")
 
+    @field_validator("entity_type", mode="before")
+    def ensure_entity_type_enum(cls, v):
+        if isinstance(v, str):
+            return EntityType(v)
+        return v
+    
+    @field_validator("significance_level", mode="before")
+    def ensure_significance_level_enum(cls, v):
+        if isinstance(v, str):
+            return SignificanceLevel(v)
+        return v
 
 class UpsertRelationship(BaseModel):
-    description: str = Field(
-        description="description of the relationship's current state")
+    relationship_type: RelationType = Field(
+        description=f"type of relationship between the source and target entity.\n{RelationType.all_descriptions()}")
+        
+    relationship_composition: RelationCompositionType = Field(
+        description=f"composition of the relationship between the source and target entity.")
     
     source_entity: str = Field(
-        description="source entity")
+        description="(new) identifier for the source entity")
     
     target_entity: str = Field(
-        description="target entity")
+        description="(new) identifier for the target entity")
     
-    relationship_type: RelationType = Field(
-        description="type of relationship between the source and target entities")
+    significance_level: SignificanceLevel = Field(
+        description=f"significance level of the relationship across the entire story\n{SignificanceLevel.all_descriptions()}")
     
-    relationship_direction: RelationDirectionType = Field(
-        description="direction of the relationship between the source and target entities")
+    strength: RelationshipStrength = Field(
+        description=f"strength of the relationship")
+    
+    current_description: str = Field(
+        description="description of the current status of the relationship")
+    
+    description: str = Field(
+        description="detailed description of the relationship across the story")
+    
+    @field_validator("relationship_type", mode="before")
+    def ensure_relationship_type_enum(cls, v):
+        if isinstance(v, str):
+            return RelationType(v)
+        return v
+    
+    @field_validator("relationship_composition", mode="before")
+    def ensure_relationship_composition_enum(cls, v):
+        if isinstance(v, str):
+            return RelationCompositionType(v)
+        return v
+    
+    @field_validator("significance_level", mode="before")
+    def ensure_significance_level_enum(cls, v):
+        if isinstance(v, str):
+            return SignificanceLevel(v)
+        return v
+    
+    @field_validator("strength", mode="before")
+    def ensure_strength_enum(cls, v):
+        if isinstance(v, str):
+            return RelationshipStrength(v)
+        return v
+    
+    
     
 class UpsertEntitiesOutputSchema(BaseModel):
     entities: List[UpsertEntity] = Field(

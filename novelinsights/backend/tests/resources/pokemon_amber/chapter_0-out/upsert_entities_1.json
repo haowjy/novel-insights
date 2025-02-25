@@ -1,0 +1,129 @@
+{
+  "resp": {
+    "entities": [
+      {
+        "detailed_description": "Gyarados is AlexaTheGreat/Amber's level 40 Pokemon in the game she was playing before being hit by the truck. It is a survivor of gym battles and random encounters. It's health is down to a sliver before Alexa is interrupted by the Discord notification.",
+        "narrative_significance": "Represents the protagonist's dedication and investment in the game world, and serves as a symbol of what she left behind when she died.",
+        "significance_level": "SUPPORTING",
+        "entity_type": "CHARACTER",
+        "identifier": "Gyarados",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Level 40",
+            "Carefully trained",
+            "Survivor of multiple gym battles",
+            "Health down to a sliver"
+          ],
+          "implicit": [],
+          "situational": [
+            "Almost defeated by a level 37 Vulpix"
+          ],
+          "foundational": [
+            "Pokemon in a game"
+          ]
+        },
+        "history": [
+          "Caught as a Magikarp on Route 6",
+          "Carefully trained to level 40"
+        ],
+        "aliases": [
+          "Gyarados"
+        ],
+        "related_entities": [
+          "AlexaTheGreat"
+        ]
+      },
+      {
+        "detailed_description": "The underground laboratory is Dr. Fuji's research facility, where he conducts experiments related to Pokemon cloning and genetic engineering. It's the birthplace of Mewtwo and Amber. The lab is equipped with tanks containing amber fluid, reinforced doors, and various scientific instruments. The lab is destroyed during Mewtwo's escape.",
+        "narrative_significance": "Represents the unethical scientific endeavors and the starting point of the protagonist's new life as Amber. It's destruction sets the stage for the story moving forward.",
+        "significance_level": "MAJOR",
+        "entity_type": "LOCATION",
+        "identifier": "Laboratory",
+        "old_identifier": null,
+        "facts": {
+          "explicit": [
+            "Underground",
+            "Contains tanks filled with amber fluid",
+            "Location of Mewtwo's creation",
+            "Location of Amber's cloning"
+          ],
+          "implicit": [
+            "Located beneath a wealthy estate"
+          ],
+          "situational": [
+            "In a state of chaos and destruction after Mewtwo's escape",
+            "Flooded with emergency lights and smoke",
+            "Suffering structural failure"
+          ],
+          "foundational": [
+            "Research facility"
+          ]
+        },
+        "history": [
+          "Site of experiments on Pokemon cloning and genetic engineering",
+          "Creation of Mewtwo",
+          "Cloning of Amber",
+          "Destruction during Mewtwo's escape"
+        ],
+        "aliases": [
+          "the lab",
+          "facility"
+        ],
+        "related_entities": [
+          "Dr. Fuji",
+          "Mewtwo",
+          "Amber"
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "relationship_type": "SOCIAL",
+        "relationship_composition": "BELONGS_TO",
+        "source_entity": "Gyarados",
+        "target_entity": "AlexaTheGreat",
+        "significance_level": "SUPPORTING",
+        "strength": "MEDIUM",
+        "current_description": "AlexaTheGreat/Amber is the owner and trainer of Gyarados in the game.",
+        "description": "AlexaTheGreat/Amber owns and trains Gyarados in the Pokemon game she was playing before her reincarnation. Gyarados is one of her main Pokemon."
+      },
+      {
+        "relationship_type": "PHYSICAL",
+        "relationship_composition": "CONTAINS",
+        "source_entity": "Dr. Fuji",
+        "target_entity": "Laboratory",
+        "significance_level": "CENTRAL",
+        "strength": "VERY_STRONG",
+        "current_description": "The laboratory is the location where Dr. Fuji conducts his experiments and created Mewtwo and Amber.",
+        "description": "The laboratory is the base of operations for Dr. Fuji's research, including the creation of Mewtwo and the cloning of Amber. It contains the equipment and resources necessary for these experiments."
+      },
+      {
+        "relationship_type": "PHYSICAL",
+        "relationship_composition": "CONTAINS",
+        "source_entity": "Mewtwo",
+        "target_entity": "Laboratory",
+        "significance_level": "CENTRAL",
+        "strength": "VERY_STRONG",
+        "current_description": "The laboratory is the birthplace of Mewtwo.",
+        "description": "Mewtwo was genetically engineered and 'born' in the lab."
+      },
+      {
+        "relationship_type": "PHYSICAL",
+        "relationship_composition": "CONTAINS",
+        "source_entity": "Amber",
+        "target_entity": "Laboratory",
+        "significance_level": "CENTRAL",
+        "strength": "VERY_STRONG",
+        "current_description": "The laboratory is the birthplace of Amber.",
+        "description": "Amber was cloned in the lab by Dr. Fuji."
+      }
+    ]
+  },
+  "usage": {
+    "prompt_tokens": 3950,
+    "completion_tokens": 1207,
+    "total_tokens": 5157
+  },
+  "model_config": null
+}

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Any, List, Literal, Optional, Type, TypedDict, Union
+from dataclasses import asdict, dataclass
+import json
+from typing import Any, Generic, List, Literal, Optional, Type, TypeVar
 
 from pydantic import BaseModel
 
@@ -12,18 +13,49 @@ from google.genai import types as google_types
 
 from novelinsights.core.config import ModelConfig
 
-class Message(TypedDict):
+@dataclass(frozen=True)
+class Message:
     content: str
     role: Literal["user", "assistant"]
     
-class UsageMetadata(TypedDict):
+@dataclass(frozen=True)
+class UsageMetadata:
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
+
+T = TypeVar("T", bound=BaseModel)
+
+@dataclass
+class LLMResponse(Generic[T]):
+    resp: Any | T
+    usage: UsageMetadata
+    model_config: Optional[ModelConfig] = None
     
-class LLMResponse(TypedDict):
-    response: Any
-    usage_metadata: UsageMetadata
+    def to_dict(self) -> dict:
+        result = asdict(self)
+        result["resp"] = self.resp.model_dump(mode="json") if isinstance(self.resp, BaseModel) else self.resp
+        return result
+
+    def to_json_str(self, indent: int = 2) -> str:
+        return json.dumps(self.to_dict(), indent=indent)
+    
+    @classmethod
+    def from_dict(cls, data: dict, resp_schema: Optional[Type[BaseModel]] = None) -> 'LLMResponse':
+        # Create the instance with raw data
+        instance = cls(**data)
+        
+        # Apply schema validation if provided
+        if resp_schema and instance.resp:
+            instance.resp = resp_schema.model_validate(instance.resp)
+        
+        return instance
+    
+    @classmethod
+    def from_json(cls, json_str: str, resp_schema: Optional[Type[BaseModel]] = None) -> 'LLMResponse':
+        data = json.loads(json_str)
+        return cls.from_dict(data, resp_schema)
+    
 
 class LLMClient(ABC):
     """Abstract base class for LLM clients"""
@@ -38,6 +70,7 @@ class LLMClient(ABC):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False,
         **kwargs: Any) -> LLMResponse:
         """Generate a prompt"""
         raise NotImplementedError("Subclasses must implement this method")
@@ -49,6 +82,7 @@ class LLMClient(ABC):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False,
         **kwargs: Any) -> LLMResponse:
         """Generate a structured prompt"""
         raise NotImplementedError("Subclasses must implement this method")
@@ -60,6 +94,7 @@ class LLMClient(ABC):
         messages: List[Message],
         system: Optional[str] = None,
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False,
         **kwargs: Any) -> Any:
         """Generate a chat prompt"""
         raise NotImplementedError("Subclasses must implement this method")
@@ -85,7 +120,7 @@ class GoogleGeminiClient(LLMClient):
         model_config: ModelConfig,
         contents: List[Message] | str, 
         system: Optional[str] = None, 
-        structured_schema: Optional[Type[BaseModel]] = None
+        structured_schema: Optional[Type[BaseModel]] = None,
         ) -> google_types.GenerateContentResponse:
         """Send LLM API request to Google Gemini
         
@@ -113,7 +148,7 @@ class GoogleGeminiClient(LLMClient):
 
         response = self.client.models.generate_content(
             model=model_config.model,
-            contents=[m.get("content", "") for m in google_contents],
+            contents=[m.content for m in google_contents],
             config={
             "system_instruction": system,
             
@@ -137,6 +172,7 @@ class GoogleGeminiClient(LLMClient):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False
         ) -> LLMResponse:
         """Generate a text response from Google Gemini"""
         resp = self.__generate(model_config, contents, system, structured_schema)
@@ -146,12 +182,13 @@ class GoogleGeminiClient(LLMClient):
         total_token_count = resp.usage_metadata.total_token_count or 0 if resp.usage_metadata else 0
         
         return LLMResponse(
-            response=resp.text, 
-            usage_metadata=UsageMetadata(
+            resp=resp.text, 
+            usage=UsageMetadata(
                 prompt_tokens=prompt_token_count,
                 completion_tokens=completion_token_count,
                 total_tokens=total_token_count
-            )
+            ),
+            model_config=model_config if store_config else None
         )
     
     def generate_structured(
@@ -160,6 +197,7 @@ class GoogleGeminiClient(LLMClient):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False
         ) -> LLMResponse:
         """Generate a structured response from Google Gemini"""
         resp = self.__generate(model_config, contents, system, structured_schema)
@@ -169,12 +207,13 @@ class GoogleGeminiClient(LLMClient):
         total_token_count = resp.usage_metadata.total_token_count or 0 if resp.usage_metadata else 0
         
         return LLMResponse(
-            response=resp.parsed,
-            usage_metadata=UsageMetadata(
+            resp=resp.parsed,
+            usage=UsageMetadata(
                 prompt_tokens=prompt_token_count,
                 completion_tokens=completion_token_count,
                 total_tokens=total_token_count
-            )
+            ),
+            model_config=model_config if store_config else None
         )
     
     def generate_chat(
@@ -183,6 +222,7 @@ class GoogleGeminiClient(LLMClient):
         messages: List[Message],
         system: Optional[str] = None,
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False,
         **kwargs: Any) -> Any:
         """Generate a chat response from Google Gemini"""
         
@@ -216,7 +256,7 @@ class AnthropicClient(LLMClient):
         if isinstance(contents, str):
             anthropic_contents = [MessageParam(role="user", content=contents)]
         else:
-            anthropic_contents = [MessageParam(role=m.get("role", "user"), content=m.get("content", "")) for m in contents]
+            anthropic_contents = [MessageParam(role=m.role, content=m.content) for m in contents]
         
         if structured_schema:
             raise NotImplementedError("Structured schema is not supported for anthropic")
@@ -238,6 +278,7 @@ class AnthropicClient(LLMClient):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False
         ) -> LLMResponse:
         """Generate a text response from Anthropic"""
         resp = self.__generate(model_config, contents, system, structured_schema)
@@ -245,12 +286,13 @@ class AnthropicClient(LLMClient):
         resp_content = resp.content[0].text if resp.content[0].type == "text" else None
         
         return LLMResponse(
-            response=resp_content,
-            usage_metadata=UsageMetadata(
+            resp=resp_content,
+            usage=UsageMetadata(
                 prompt_tokens=resp.usage.input_tokens,
                 completion_tokens=resp.usage.output_tokens,
                 total_tokens=resp.usage.input_tokens + resp.usage.output_tokens
-            )
+            ),
+            model_config=model_config if store_config else None
         )
         
     def generate_structured(
@@ -259,6 +301,7 @@ class AnthropicClient(LLMClient):
         contents: List[Message] | str, 
         system: Optional[str] = None, 
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False
         ) -> LLMResponse:
         """Generate a structured response from Anthropic"""
         raise NotImplementedError("Structured schema is not supported for anthropic")
@@ -269,6 +312,7 @@ class AnthropicClient(LLMClient):
         messages: List[Message],
         system: Optional[str] = None,
         structured_schema: Optional[Type[BaseModel]] = None,
+        store_config: bool = False,
         **kwargs: Any) -> Any:
         """Generate a chat response from Anthropic"""
         

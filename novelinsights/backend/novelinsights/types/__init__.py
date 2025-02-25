@@ -1,7 +1,7 @@
 from novelinsights.types.base import DescribedEnum
 from novelinsights.types.content import ContextType, ContextScope
 from novelinsights.types.core import CreationSourceType
-from novelinsights.types.knowledge import EntityType, RelationDirectionType, RelationType, RelationStatusType
+from novelinsights.types.knowledge import EntityType, RelationCompositionType, RelationType, RelationStatusType
 
 from novelinsights.types.services.provider import Provider
 from novelinsights.types.services.prompt import PromptType
@@ -20,7 +20,7 @@ __all__ = [
     
     # Knowledge Graph
     "EntityType",
-    "RelationDirectionType",
+    "RelationCompositionType",
     "RelationType",
     "RelationStatusType",
     

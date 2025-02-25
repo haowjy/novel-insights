@@ -1,0 +1,111 @@
+{
+    "$defs": {
+        "EntityType": {
+            "enum": [
+                "CHARACTER",
+                "ITEM",
+                "LOCATION",
+                "GROUP",
+                "CONCEPT",
+                "CULTURE",
+                "TIME_PERIOD",
+                "EVENT",
+                "ARC",
+                "PLOT_POINT",
+                "SYMBOLISM",
+                "ALLUSION",
+                "THEME",
+                "OTHER"
+            ],
+            "title": "EntityType",
+            "type": "string"
+        },
+        "FoundEntity": {
+            "properties": {
+                "brief_description": {
+                    "description": "a brief description of the entity (what the entity is, what it does, etc)",
+                    "title": "Brief Description",
+                    "type": "string"
+                },
+                "narrative_significance": {
+                    "description": "the narrative significance of the entity in the context of this chapter",
+                    "title": "Narrative Significance",
+                    "type": "string"
+                },
+                "significance_level": {
+                    "$ref": "#/$defs/SignificanceLevel",
+                    "description": "the significance level of the entity to the chapter's plot and the story as a whole.\nSignificanceLevel: CENTRAL: crucial to everything, MAJOR: crucial to current events, SUPPORTING: actively involved in current events, MINOR: relevant but not crucial, BACKGROUND: not important to current events, PERIPHERAL: mentioned but barely relevant"
+                },
+                "entity_type": {
+                    "$ref": "#/$defs/EntityType",
+                    "description": "the type of entity.\nEntityType: CHARACTER: Sentient entities (named or unnamed), ITEM: Physical or abstract objects of significance, LOCATION: Places or spaces of significance, GROUP: Formal or informal collections of characters, CONCEPT: Abstract ideas, systems, or theories, CULTURE: Societal patterns, practices, and beliefs, TIME_PERIOD: Significant temporal ranges, EVENT: Discrete occurrences or happenings of the story, ARC: Major narrative progressions, PLOT_POINT: Significant story developments, SYMBOLISM: Symbolic elements and their meanings, ALLUSION: References to external works/concepts, THEME: Recurring ideas or motifs, OTHER: Other types not listed above"
+                },
+                "identifier": {
+                    "description": "the main identifier of the entity that will be used to reference the entity and you believe is unique",
+                    "title": "Identifier",
+                    "type": "string"
+                },
+                "aliases": {
+                    "description": "all names and other identifiers for the entity",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Aliases",
+                    "type": "array"
+                },
+                "related_entities": {
+                    "description": "list of entity identifiers that are related to the entity",
+                    "items": {
+                        "type": "string"
+                    },
+                    "title": "Related Entities",
+                    "type": "array"
+                }
+            },
+            "required": [
+                "brief_description",
+                "narrative_significance",
+                "significance_level",
+                "entity_type",
+                "identifier",
+                "aliases",
+                "related_entities"
+            ],
+            "title": "FoundEntity",
+            "type": "object"
+        },
+        "SignificanceLevel": {
+            "enum": [
+                "CENTRAL",
+                "MAJOR",
+                "SUPPORTING",
+                "MINOR",
+                "BACKGROUND",
+                "PERIPHERAL"
+            ],
+            "title": "SignificanceLevel",
+            "type": "string"
+        }
+    },
+    "properties": {
+        "reasoning": {
+            "description": "detailed reasoning for all the important entities found in the chapter and how they interact with the story",
+            "title": "Reasoning",
+            "type": "string"
+        },
+        "entities": {
+            "description": "important entities found in the chapter that carry narrative significance",
+            "items": {
+                "$ref": "#/$defs/FoundEntity"
+            },
+            "title": "Entities",
+            "type": "array"
+        }
+    },
+    "required": [
+        "reasoning",
+        "entities"
+    ],
+    "title": "FindEntitiesOutputSchema",
+    "type": "object"
+}

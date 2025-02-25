@@ -95,13 +95,16 @@ class PromptBase(ABC):
         p = self._prompt_template.template().prompt()
         return p
     
-    def generate(self, client: LLMClient, **kwargs: Any) -> LLMResponse:
+    def generate(self, client: LLMClient, store_config: bool = False, **kwargs: Any) -> LLMResponse:
         """Generate a simple text response from the LLM using the given client"""
-        return client.generate(self.model_config, self.render(**kwargs))
+        return client.generate(self.model_config, self.render(**kwargs), store_config=store_config)
     
-    def generate_structured(self, client: LLMClient, **kwargs: Any) -> LLMResponse:
+    def generate_structured(self, client: LLMClient, store_config: bool = False, **kwargs: Any) -> LLMResponse:
         """Generate a structured response from the LLM using the given client"""
-        return client.generate_structured(self.model_config, self.render(**kwargs), structured_schema=self.prompt_template.structured_output_schema)
+        if self.prompt_template.has_structured_out:
+            return client.generate_structured(self.model_config, self.render(**kwargs), structured_schema=self.prompt_template.structured_output_schema, store_config=store_config)
+        else:
+            raise ValueError("No structured output schema defined for this prompt")
 
     
     #
@@ -134,4 +137,4 @@ class PromptBase(ABC):
     
     def __repr__(self) -> str:
         """Representation of the prompt"""
-        return f"{self.__class__.__name__}(name={self.name}, version={self.version}, type={self.type}, has_structured_out={self.prompt_template.has_structured_out()}, description={self.description})"
+        return f"{self.__class__.__name__}(name={self.name}, version={self.version}, type={self.type}, has_structured_out={self.prompt_template.has_structured_out}, description={self.description})"

@@ -61,25 +61,7 @@ class FindEntitiesTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeCha
         )
         
         p += (
-            "\n# Guidelines\n\n" +
-            "## Entity Categories\n" +
-            "Extract important entities for the following categories:\n"
-        )
-        
-        for i, entity in enumerate(EntityType):
-            p += (
-                f"{i+1}. {entity.value}s: {entity.description}\n"
-            )
-        
-        p += (
-            "\n## Format\n" +
-            "For each entity, include the following fields:\n" +
-            "- Main Identifier of the entity that will be used to reference the entity and you believe is unique\n" +
-            "- Aliases (all names and other identifiers for the entity)\n" +
-            "- Description of the entity (what the entity is, what it does, etc)\n" +
-            "- Narrative Significance (why this entity matters in the context of this chapter)\n" +
-            "- Significance Level to the chapter's plot (central - crucial to everything; major - crucial to current events; supporting - actively involved in current events; minor - relevant but not crucial; background - not important to current events; peripheral - mentioned but barely relevant)\n" +
-            "- other related entities mentioned\n"
+            "\n# Guidelines\n"
         )
         
         p += (
@@ -99,35 +81,10 @@ class FindEntitiesTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeCha
         )
         
         if not self.has_structured_out:
-            p += ("\n## Example Output" +
-"""
-```json
-{
-    "time_periods": [],
-    ...
-    "characters": [
-        {
-            "identifier": "John Doe",
-            "aliases": ["John", "Doe", "JD", "Protagonist"],
-            "description": "A young man with a kind heart and a strong sense of justice.",
-            "narrative_significance": "John Doe is the protagonist of the story, and his journey is central to the plot.",
-            "significance_level": "central",
-            "related_entities": ["Jane Smith", "Bob Johnson"]
-        },
-        {
-            "identifier": "John Doe's Dog",
-            "aliases": [],
-            "description": "A loyal and friendly dog who accompanies John Doe on his journey.",
-            "narrative_significance": "The dog is a companion to John Doe and provides emotional support throughout the story.",
-            "significance_level": "supporting",
-            "related_entities": ["John Doe"]
-        },
-        ...
-    ],
-    ...
-}
-```
-""")
+            p += (
+                "\n## Output JSON Schema" +
+                f"{FindEntitiesOutputSchema.model_json_schema()}"
+                )
         return p
     
     @classmethod
@@ -163,7 +120,7 @@ class FindEntitiesPrompt(PromptBase):
             provider=Provider.GOOGLE,
             max_tokens=8192, # maybe 4096 can be enough?
             model="gemini-2.0-flash-001",
-            temperature=0.7,
+            temperature=0.3,
         )
         
         if model_config is not None:

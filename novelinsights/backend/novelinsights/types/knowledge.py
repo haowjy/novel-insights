@@ -1,102 +1,126 @@
-from enum import Enum
+from enum import Enum, auto
 from novelinsights.types.base import DescribedEnum
 
 #
 # Knowledge Graph
 #
 #
+       
 class EntityType(DescribedEnum):
+    # Concrete
+    CHARACTER = auto(), "Sentient entities (named or unnamed)"
+    ITEM = auto(), "Physical or abstract objects of significance"
+    LOCATION = auto(), "Places or spaces of significance"
+    
+    # Collective
+    GROUP = auto(), "Formal or informal collections of characters"
+    
+    # Abstract/Conceptual
+    CONCEPT = auto(), "Abstract ideas, systems, or theories"
+    CULTURE = auto(), "Societal patterns, practices, and beliefs"
     
     # Temporal
-    TIME_PERIOD = ("time_period", "Significant temporal ranges")
-    EVENT = ("event", "Significant events, occurrences")
-    
-    # Entities and Groups
-    ORGANIZATION = ("organization", "Formal institutions with defined hierarchies, leadership, and clear purpose")
-    GROUP = ("group", "Significant groups that can be described as a collection of characters")
-    CHARACTER = ("character", "Significant people, beings, or sentient entities, (including unnamed characters)")
-    
-    LOCATION = ("location", "Significant places or spaces, (including unnamed locations)")
-    ITEM = ("item", "Significant physical or abstract objects (e.g. weapons, artifacts, technologies)")
-    CONCEPT = ("concept", "Significant ideas, systems, powers, theories introduced in the work")
-    CULTURE = ("culture", "Significant societal patterns/practices")
+    TIME_PERIOD = auto(), "Significant temporal ranges"
     
     # Narrative
-    ARC = ("arc", "Major narrative progressions")
-    THEME = ("theme", "Recurring ideas or motifs")
+    ARC = auto(), "the overall shape and progression of a narrative from beginning to end, typically following a pattern of setup, rising conflict, climax, and resolution"
+    PLOT_EVENT = auto(), "Pivotal events that significantly alter the narrative's trajectory"
+    PLOT_POINT = auto(), "Significant story developments or turning points that drive the plot forward"
     
-    # Literary Elements
-    SYMBOLISM = ("symbolism", "Significant symbols and their meanings")
-    ALLUSION = ("allusion", "References to other works, events, or cultural touchpoints")
+    # Literary
+    SYMBOLISM = auto(), "Symbolic elements and their meanings"
+    ALLUSION = auto(), "References to external works/concepts"
+    THEME = auto(), "Recurring ideas or motifs"
     
-    OTHER = ("other", "Other types not listed above")
+    OTHER = auto(), "Other types not listed above"
 
-
-
-class RelationDirectionType(DescribedEnum):
-    OUTBOUND = ("outbound", "Relationship from source to target")
-    INBOUND = ("inbound", "Relationship from target to source")
-    BIDIRECTIONAL = ("bidirectional", "Mutual relationship")
 
 class RelationType(DescribedEnum):
-    # Social/Personal
-    FAMILY = ("family", "Family relationships")
-    FRIENDSHIP = ("friendship", "Friendships")
-    RIVALRY = ("rivalry", "Rivalries/enemies")
-    ROMANCE = ("romance", "Romantic relationships")
+    SOCIAL = auto(), "Interpersonal relationships (including familial)"
+    ORGANIZATIONAL = auto(), "Institutional or group relationships"
+    PHYSICAL = auto(), "Spatial or temporal relationships"
+    THEMATIC = auto(), "Narrative, conceptual, or literary relationships"
+    CULTURAL = auto(), "Societal and cultural connections"
+
+class RelationCompositionType(DescribedEnum):
+    # Basic Structural
+    CONTAINS = auto(), "Complete containment/ownership"
+    COMPRISES = auto(), "Made up of parts, strong composition"
+    AGGREGATES = auto(), "Loose collection of independent entities"
+    ASSOCIATES = auto(), "Connected but independent"
     
-    # Organizational
-    MEMBERSHIP = ("membership", "Being part of an organization/group")
-    LEADERSHIP = ("leadership", "Leading/commanding others")
-    ALLIANCE = ("alliance", "Alliances between groups/entities")
+    # Hierarchical
+    SPECIALIZES = auto(), "More specific version of (is-a)"
+    GENERALIZES = auto(), "More general version of (is-a)"
+    DERIVES_FROM = auto(), "Stems or originates from"
+    DEPENDS_ON = auto(), "Requires or needs"
     
-    # Spatial/Physical
-    LOCATION = ("location", "Physical relationships (contains, near, etc.)")
-    POSSESSION = ("possession", "Ownership/possession relationships")
+    # Narrative Structure
+    TRANSFORMS_INTO = auto(), "Becomes or changes into"
+    BUILDS_UPON = auto(), "Sequentially develops from"
+    MIRRORS = auto(), "Structurally parallels or reflects"
+    RESONATES_WITH = auto(), "Creates structural harmony/echo"
     
-    # Abstract/Other
-    KNOWLEDGE = ("knowledge", "Knowledge/awareness relationships")
-    INFLUENCE = ("influence", "Impact/effect relationships")
-    CAUSATION = ("causation", "Cause-effect relationships")
-    OTHER = ("other", "Other relationship types")
+    # Membership
+    BELONGS_TO = auto(), "Member or part of group/whole"
+    INCLUDES = auto(), "Has as member or component"
+    
 
 class RelationStatusType(DescribedEnum):
-    ACTIVE = ("active", "Currently valid relationship")
-    DORMANT = ("dormant", "Temporarily inactive (e.g., characters separated)")
-    BROKEN = ("broken", "Explicitly ended (e.g., breakup, betrayal)")
-    DECEASED = ("deceased", "One party died")
-    HISTORICAL = ("historical", "Past relationship, no longer current")
-    UNKNOWN = ("unknown", "Status unclear or not specified")
-
-class EntitySignificanceLevel(str, Enum):
-    CENTRAL = "central"
-    MAJOR = "major"
-    SUPPORTING = "supporting"
-    MINOR = "minor"
-    BACKGROUND = "background"
-    PERIPHERAL = "peripheral"
+    # State
+    ACTIVE = auto(), "Currently valid relationship"
+    INACTIVE = auto(), "Not currently active but still exists"
+    TERMINATED = auto(), "Explicitly ended"
+    
+    # Development
+    DEVELOPING = auto(), "Forming or strengthening"
+    TRANSFORMING = auto(), "Changing in nature"
+    
+    # Certainty
+    AMBIGUOUS = auto(), "Status unclear or uncertain"
+        
+class SignificanceLevel(DescribedEnum):
+    CENTRAL = auto(), "crucial to everything"
+    MAJOR = auto(), "crucial to current events"
+    SUPPORTING = auto(), "actively involved in current events"
+    MINOR = auto(), "relevant but not crucial"
+    BACKGROUND = auto(), "not important to current events"
+    PERIPHERAL = auto(), "mentioned but barely relevant"
     
     def to_int(self) -> int:
-        return {
-            self.CENTRAL: 5,
-            self.MAJOR: 4,
-            self.SUPPORTING: 3,
-            self.MINOR: 2,
-            self.BACKGROUND: 1,
-            self.PERIPHERAL: 0,
-        }[self]
+        return {self.CENTRAL: 5,self.MAJOR: 4,self.SUPPORTING: 3,self.MINOR: 2,self.BACKGROUND: 1,self.PERIPHERAL: 0,}[self]
     
-    def __gt__(self, other: "EntitySignificanceLevel") -> bool:
+    def __gt__(self, other: "SignificanceLevel") -> bool:
         return self.to_int() > other.to_int()
     
-    def __ge__(self, other: "EntitySignificanceLevel") -> bool:
+    def __ge__(self, other: "SignificanceLevel") -> bool:
         return self.to_int() >= other.to_int()
     
-    def __lt__(self, other: "EntitySignificanceLevel") -> bool:
+    def __lt__(self, other: "SignificanceLevel") -> bool:
         return self.to_int() < other.to_int()
     
-    def __le__(self, other: "EntitySignificanceLevel") -> bool:
+    def __le__(self, other: "SignificanceLevel") -> bool:
         return self.to_int() <= other.to_int()
 
     
+class RelationshipStrength(DescribedEnum):
+    WEAK = auto(), "Weak relationship"
+    MEDIUM = auto(), "Medium relationship"
+    STRONG = auto(), "Strong relationship"
+    VERY_STRONG = auto(), "Very strong relationship"
+    EXTRA_STRONG = auto(), "Extra strong relationship"
     
+    def to_int(self) -> int:
+        return {self.WEAK: 1,self.MEDIUM: 2,self.STRONG: 3,self.VERY_STRONG: 4,self.EXTRA_STRONG: 5,}[self]
+    
+    def __gt__(self, other: "RelationshipStrength") -> bool:
+        return self.to_int() > other.to_int()
+    
+    def __ge__(self, other: "RelationshipStrength") -> bool:
+        return self.to_int() >= other.to_int()
+
+    def __lt__(self, other: "RelationshipStrength") -> bool:
+        return self.to_int() < other.to_int()
+    
+    def __le__(self, other: "RelationshipStrength") -> bool:
+        return self.to_int() <= other.to_int()

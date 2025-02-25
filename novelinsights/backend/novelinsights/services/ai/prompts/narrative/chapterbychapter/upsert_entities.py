@@ -39,7 +39,7 @@ class UpsertEntitiesTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeC
         p = (
             f"{self._persona()}\n\n" +
             "# Overarching Goal\n" +
-            "Update or create the entities in the chapter, focusing on elements that have narrative importance or impact on the story.\n\n"
+            "Update or create the entities in the chapter, focusing on elements that have narrative importance or impact on the story\n"
         )
         if has_story_metadata:
             p += (
@@ -90,86 +90,18 @@ class UpsertEntitiesTemplate(PromptTemplateBase, NarrativeStoryMixin, NarrativeC
             )
         
         p += (
-            f"\n## Format\n" +
-            "For each entity, include the following fields:\n" +
-            "- Main Identifier of the entity that will be used to reference the entity and you believe is unique. You may change the identifier if you think it is no longer unique.\n" +
-            "- Aliases (all names and other identifiers for the entity)\n" +
-            "- Detailed description of the entity\n" +
-            "- Knowledge/facts about the entity (explicit - directly stated in text, implicit - inferred from the text, situational - temporary/contextual information, foundational - core/persistent information)\n" +
-            "- Detailed chronology of important history of the entity\n" +
-            "- Narrative Significance (why this entity matters)\n" +
-            "- Significance Level to the chapter's plot (central; major; supporting; minor; background)\n" +
-            "- Relationships to other entities\n" +
-            "\n" +
-            "For each relationship, include the following fields:\n" +
-            "  - Source Entity\n" +
-            "  - Target Entity\n" +
-            "  - Relationship Type\n" +
-            "  - Relationship Direction\n" +
-            "  - Description of the relationship's current state\n"
-        )
-        
-        p += (
             "\n## Rules\n" +
             "- Make sure to combine entities that reference the same entity (describe the entity in more detail and update the identifier if needed)\n" +
             "- Note uncertainty when entity details are ambiguous\n" +
-            "- Ensure as much information as possible is included in the descriptions and history for each entity\n" +
             ("- Please format the entities using JSON with ```json to make it easy to parse\n" if not self.has_structured_out else "")
         )
         
-        # TODO: add example output
         if not self.has_structured_out:
-            p += ("\n## Example Output" +
-""" 
-```json
-{
-    "entities": [
-        {
-            "identifier": "John Doe",
-            "aliases": ["John", "Doe", "JD", "Protagonist"],
-            "description": "A young man with a kind heart and a strong sense of justice.",
-            "facts": {
-                "explicit": [
-                    "the protagonist of the story, and his journey is central to the plot.",
-                    "swordsman",
-                    ...
-                ],
-                "implicit": [
-                    "a good person who always helps others.",
-                    ...
-                ],
-                "situational": [
-                    "on a quest to save the world from a great evil.",
-                    ...
-                ],
-                "foundational": [
-                    "has a strong sense of justice.",
-                    ...
-                ],
-            },
-            "history": [
-                "trained in the art of swordsmanship since childhood",
-                ...
-            ],
-            "narrative_significance": "John Doe is the protagonist of the story, and his journey is central to the plot.",
-            "significance_level": "central",
-            "related_entities": ["Jane Smith", "Bob Johnson"]
-        },
-        ...
-    ],
-    "relationships": [
-        {
-            "source_entity": "John Doe",
-            "target_entity": "Jane Smith",
-            "relationship_type": "friend",
-            "relationship_direction": "bidirectional",
-            "description": "John and Jane are good friends who support each other through thick and thin."
-        },
-        ...
-    ]
-}
-```
-""")
+            p += (
+                "\n## Output JSON Schema" +
+                f"{UpsertEntitiesOutputSchema.model_json_schema()}"
+                )
+        
         return p
     
     @classmethod

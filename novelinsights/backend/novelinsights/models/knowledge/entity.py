@@ -21,7 +21,7 @@ from pgvector.sqlalchemy import Vector
 
 from novelinsights.models.base import TemporalSnapshotMixin, CoreBase
 from novelinsights.models.metadata.agent_metadata import AgentMetadata
-from novelinsights.types.knowledge import EntityType
+from novelinsights.types.knowledge import SignificanceLevel, EntityType
 from novelinsights.types.core import CreationSourceType
 """
 
@@ -70,8 +70,8 @@ class EntityState(TemporalSnapshotMixin, CoreBase):
     )
     
     # AI-generated fields
-    importance = Column(Integer, comment="1-5, 1 being the most important")
-    summary = Column(Text) # AI generated summary of the content unit
+    importance = Column(SQLEnum(SignificanceLevel), comment="Importance of the entity to the story")
+    summary = Column(Text) # AI generated summary of the entity
     
     # TODO: is this much conditional logic needed?
     knowledge = Column(JSONB, 

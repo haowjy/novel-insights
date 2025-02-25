@@ -19,7 +19,7 @@ from sqlalchemy.orm import relationship
 
 from novelinsights.models.base import Base, TemporalSnapshotMixin, CoreBase
 from novelinsights.types.core import CreationSourceType
-from novelinsights.types.knowledge import RelationDirectionType, RelationStatusType, RelationType
+from novelinsights.types.knowledge import RelationCompositionType, RelationStatusType, RelationType
 
 """
 
@@ -140,7 +140,7 @@ class Relationship(CoreBase):
         overlaps="relationships",
         )
     
-    direction = Column(SQLEnum(RelationDirectionType), nullable=False, index=True)
+    direction = Column(SQLEnum(RelationCompositionType), nullable=False, index=True)
     
     # Type classification
     relationship_type = Column(SQLEnum(RelationType), nullable=False, index=True)
